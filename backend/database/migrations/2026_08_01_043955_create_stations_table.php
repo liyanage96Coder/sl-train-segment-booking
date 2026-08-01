@@ -12,11 +12,9 @@ return new class extends Migration
 
             $table->id();
             $table->string('station_name');
-            $table->string('station_code',10)
-                ->unique();
-            // Route order
-            $table->integer('station_order')
-                ->unique();
+            $table->string('station_code',10)->unique();
+            $table->integer('station_order')->unique();
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }

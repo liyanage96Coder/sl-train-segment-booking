@@ -7,4 +7,6 @@ Route::prefix('stations')->group(function(){
     Route::get('/',[StationController::class,'index']);
     Route::post('/',[StationController::class,'store']);
     Route::post('/insert-between',[StationController::class,'insertBetween']);
+    Route::put('/{station}', [StationController::class, 'update']);
+    Route::delete('/{station}', [StationController::class, 'destroy']);
 });
