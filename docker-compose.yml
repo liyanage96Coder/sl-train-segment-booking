@@ -1,0 +1,68 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: train_booking_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-train_booking}
+      MYSQL_USER: ${DB_USERNAME:-train_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: train_booking_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-train_booking}
+      DB_USERNAME: ${DB_USERNAME:-train_user}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - ./backend:/var/www/html
+      - /var/www/html/vendor
+    ports:
+      - "8000:8000"
+    # Runs migrations + seeders on every boot, then starts the server.
+    # Safe to leave in for dev; consider removing --seed for anything
+    # resembling a prod deploy.
+    command: >
+      sh -c "php artisan migrate --force --seed &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+
+  frontend:
+    platform: linux/amd64
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: train_booking_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  db_data:
