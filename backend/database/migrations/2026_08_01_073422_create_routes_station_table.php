@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('route_id')->constrained()->cascadeOnDelete();
             $table->foreignId('station_id')->constrained()->restrictOnDelete();
             $table->unsignedInteger('stop_order');
+            $table->decimal('distance_km', 8, 2);
             $table->boolean('active')->default(true);
             $table->timestamps();
 

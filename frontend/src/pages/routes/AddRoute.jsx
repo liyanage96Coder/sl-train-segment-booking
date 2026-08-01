@@ -10,6 +10,7 @@ export default function AddRoute() {
     const [routeName, setRouteName] = useState("");
     // Map of stationId -> stop_order, only present for checked stations.
     const [selected, setSelected] = useState({});
+    const [distances, setDistances] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -44,10 +45,11 @@ export default function AddRoute() {
             const next = { ...prev };
 
             if (station.id in next) {
-                // Unchecking: remove it, then compact remaining orders down so
-                // there's never a gap (e.g. removing #2 out of [1,2,3] leaves
-                // [1,3] otherwise, and the "must be 1..N" rule would break).
                 delete next[station.id];
+                setDistances((prev) => {
+                    const { [station.id]: _, ...rest } = prev;
+                    return rest;
+                });
                 const remaining = Object.entries(next).sort((a, b) => a[1] - b[1]);
                 remaining.forEach(([id], index) => {
                     next[id] = index + 1;
@@ -62,6 +64,10 @@ export default function AddRoute() {
 
     const handleOrderChange = (stationId, newOrder) => {
         setSelected((prev) => ({ ...prev, [stationId]: Number(newOrder) }));
+    };
+
+    const handleDistanceChange = (stationId, value) => {
+        setDistances((prev) => ({ ...prev, [stationId]: value }));
     };
 
     const orderOptionsFor = (stationId) => {
@@ -107,6 +113,7 @@ export default function AddRoute() {
                 stations: Object.entries(selected).map(([station_id, stop_order]) => ({
                     station_id: Number(station_id),
                     stop_order,
+                    distance_km: Number(distances[station_id] || 0),
                 })),
             });
 
@@ -159,19 +166,31 @@ export default function AddRoute() {
                                 </S.StationName>
 
                                 {station.isChecked && (
-                                    <S.OrderSelect
-                                        value={station.order}
-                                        onChange={(e) =>
-                                            handleOrderChange(station.id, e.target.value)
-                                        }
-                                        disabled={isSubmitting}
-                                    >
-                                        {orderOptionsFor(station.id).map((n) => (
-                                            <option key={n} value={n}>
-                                                {n}
-                                            </option>
-                                        ))}
-                                    </S.OrderSelect>
+                                    <>
+                                        <S.OrderSelect
+                                            value={station.order}
+                                            onChange={(e) =>
+                                                handleOrderChange(station.id, e.target.value)
+                                            }
+                                            disabled={isSubmitting}
+                                        >
+                                            {orderOptionsFor(station.id).map((n) => (
+                                                <option key={n} value={n}>
+                                                    {n}
+                                                </option>
+                                            ))}
+                                        </S.OrderSelect>
+                                        <S.DistanceInput
+                                            type="number"
+                                            min="0"
+                                            step="0.1"
+                                            placeholder="km"
+                                            value={distances[station.id] || ""}
+                                            onChange={(e) => handleDistanceChange(station.id, e.target.value)}
+                                            disabled={isSubmitting}
+                                        />
+                                        <S.DistanceLabel>km from origin</S.DistanceLabel>
+                                    </>
                                 )}
                             </S.StationRow>
                         ))}

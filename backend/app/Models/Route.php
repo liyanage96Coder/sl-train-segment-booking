@@ -11,7 +11,7 @@ class Route extends Model
     public function stations()
     {
         return $this->belongsToMany(Station::class, 'route_station')
-            ->withPivot('stop_order')
+            ->withPivot('stop_order','distance_km')
             ->orderByPivot('stop_order');
     }
 }

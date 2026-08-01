@@ -130,6 +130,24 @@ export const HelperText = styled.p`
   margin: -8px 0 16px;
 `;
 
+export const DistanceInput = styled.input`
+  width: 84px;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+
+  &:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+  }
+`;
+
+export const DistanceLabel = styled.span`
+  font-size: 0.75rem;
+  color: #9ca3af;
+`;
+
 //Routes List
 
 export const WrapperList = styled.div`

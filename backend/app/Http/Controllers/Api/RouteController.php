@@ -76,16 +76,23 @@ class RouteController extends Controller
             'stations' => 'required|array|min:2',
             'stations.*.station_id' => 'required|integer|exists:stations,id|distinct',
             'stations.*.stop_order' => 'required|integer|min:1|distinct',
+            'stations.*.distance_km' => 'required|numeric|min:0',
         ]);
 
-        // stop_order values must be a contiguous 1..N sequence — this is
-        // what the frontend dropdown guarantees, but the backend can't
-        // trust the client, so it's re-checked here.
-        $orders = collect($validated['stations'])->pluck('stop_order')->sort()->values();
-        $expected = range(1, count($orders));
+        $sorted = collect($validated['stations'])->sortBy('stop_order')->values();
 
-        if ($orders->toArray() !== $expected) {
+        $orders = $sorted->pluck('stop_order');
+        if ($orders->toArray() !== range(1, $orders->count())) {
             abort(422, 'Stop order must be a continuous sequence starting at 1.');
+        }
+
+        // Distance must strictly increase along the route — two different
+        // stations can't sit at the same cumulative distance from the origin.
+        $distances = $sorted->pluck('distance_km')->values();
+        for ($i = 1; $i < $distances->count(); $i++) {
+            if ($distances[$i] <= $distances[$i - 1]) {
+                abort(422, 'Distance (km) must increase with each stop, in order.');
+            }
         }
 
         return $validated;
@@ -94,7 +101,10 @@ class RouteController extends Controller
     private function syncStations(Route $route, array $stations): void
     {
         $syncData = collect($stations)->mapWithKeys(fn ($s) => [
-            $s['station_id'] => ['stop_order' => $s['stop_order']],
+            $s['station_id'] => [
+                'stop_order' => $s['stop_order'],
+                'distance_km' => $s['distance_km'],
+            ],
         ])->all();
 
         $route->stations()->sync($syncData);
