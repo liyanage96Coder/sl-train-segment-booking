@@ -1,0 +1,14 @@
+# Laravel
+backend/vendor/
+backend/.env
+backend/storage/*.key
+backend/bootstrap/cache/*.php
+
+# React
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# General
+.DS_Store
+*.log
