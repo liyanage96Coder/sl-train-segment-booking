@@ -13,4 +13,14 @@ class TrainCoach extends Model
         'price_local_per_km',
         'price_foreign_per_km',
     ];
+
+    public function train()
+    {
+        return $this->belongsTo(Train::class);
+    }
+
+    public function seats()
+    {
+        return $this->hasMany(Seat::class);
+    }
 }

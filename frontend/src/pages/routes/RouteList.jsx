@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
 import { getRoutes, deleteRoute } from "../../api/routesApi";
 import Table from "../../components/shared/Table/Table.jsx";
 import * as S from "./styles.js";
 
 export default function RouteList() {
+    const navigate = useNavigate();
+
     const [routes, setRoutes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -64,7 +67,7 @@ export default function RouteList() {
             width: "100px",
             render: (route) => (
                 <S.ActionsCell>
-                    <S.IconButton disabled={deletingId === route.id}>
+                    <S.IconButton disabled={deletingId === route.id} onClick={() => navigate(`/route/edit_route/${route.id}`)}>
                         <Pencil size={14} />
                     </S.IconButton>
                     <S.IconButton

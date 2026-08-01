@@ -33,8 +33,8 @@ export default function AddStation() {
     };
 
     const handleAddStation = async (previousId) => {
-        if (!form.station_name.trim() || !form.station_code.trim()) {
-            setError("Please enter a station name and code.");
+        if (!form.station_name.trim()) {
+            setError("Please enter a station name.");
             return;
         }
 
@@ -44,7 +44,6 @@ export default function AddStation() {
         try {
             await addStation({
                 station_name: form.station_name.trim(),
-                station_code: form.station_code.trim().toUpperCase(),
                 previous_station_id: previousId,
             });
 
@@ -73,14 +72,6 @@ export default function AddStation() {
                     onChange={handleChange}
                     disabled={isSubmitting}
                 />
-                <S.Input
-                    type="text"
-                    name="station_code"
-                    placeholder="Station Code"
-                    value={form.station_code}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                />
             </S.FormRow>
 
             {error && <S.ErrorText>{error}</S.ErrorText>}
@@ -94,7 +85,7 @@ export default function AddStation() {
                 ) : (
                     <Plus size={16} />
                 )}
-                Add as first station
+                Add Station
             </S.AddAtStartButton>
 
             <S.Divider />
@@ -113,15 +104,6 @@ export default function AddStation() {
                             {station.station_name}
                             <S.StationCode>({station.station_code})</S.StationCode>
                         </S.StationLabel>
-
-                        <S.ActionButton
-                            $variant="secondary"
-                            onClick={() => handleAddStation(station.id)}
-                            disabled={isSubmitting}
-                        >
-                            <Plus size={14} />
-                            Add here
-                        </S.ActionButton>
                     </S.StationRow>
                 ))}
         </S.Wrapper>

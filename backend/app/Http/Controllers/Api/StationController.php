@@ -19,9 +19,11 @@ class StationController extends Controller
 
     public function store(StoreStationRequest $request)
     {
-        $station = Station::create(
-            $request->validated()
-        );
+        $station = Station::create([
+            'station_name' => $request->station_name,
+            'station_order' => $request->station_order,
+            'station_code' => $this->generateStationCode(),
+        ]);
 
         return response()->json([
             "message" => "Station added",
@@ -32,69 +34,71 @@ class StationController extends Controller
     public function insertBetween(Request $request)
     {
         $request->validate([
-            // nullable now — null means "insert as the very first station"
-            'previous_station_id' => 'nullable|exists:stations,id',
             'station_name' => 'required|string|max:255',
-            'station_code' => 'required|string|max:10|unique:stations,station_code',
         ]);
 
         $station = DB::transaction(function () use ($request) {
-            if ($request->previous_station_id === null) {
-                $newOrder = 1;
-            } else {
-                // Lock the reference row so a concurrent insert targeting
-                // the same previous_station_id can't compute a stale order.
-                $previousStation = Station::where('id', $request->previous_station_id)
-                    ->lockForUpdate()
-                    ->firstOrFail();
-
-                $newOrder = $previousStation->station_order + 1;
-            }
-
-            // Lock every row we're about to shift before shifting it, so
-            // two concurrent inserts into the same region serialize on
-            // this transaction instead of racing and producing duplicate
-            // station_order values.
-            Station::where('station_order', '>=', $newOrder)
-                ->lockForUpdate()
-                ->get();
-
-            Station::where('station_order', '>=', $newOrder)
-                ->increment('station_order');
+            $newOrder = (Station::max('station_order') ?? 0) + 1;
 
             return Station::create([
                 'station_name' => $request->station_name,
-                'station_code' => $request->station_code,
+                'station_code' => $this->generateStationCode(),
                 'station_order' => $newOrder,
             ]);
         });
 
         return response()->json([
-            "message" => "Station inserted successfully",
+            "message" => "Station added successfully",
             "data" => $station,
         ], 201);
     }
 
     public function update(Request $request, Station $station)
     {
-    $request->validate([
-        'station_name' => 'required|string|max:255',
-        'station_code' => [
-            'required',
-            'string',
-            'max:10',
-            'unique:stations,station_code,' . $station->id,
-        ],
-    ]);
+        $request->validate([
+            'station_name' => 'required|string|max:255',
+        ]);
 
-    $station->update([
-        'station_name' => $request->station_name,
-        'station_code' => $request->station_code,
-    ]);
+        // station_code is generated once at creation and intentionally
+        // not editable here — only the name can change.
+        $station->update([
+            'station_name' => $request->station_name,
+        ]);
 
-    return response()->json([
-        "message" => "Station updated",
-        "data" => $station->fresh(),
-    ]);
-}
+        return response()->json([
+            "message" => "Station updated",
+            "data" => $station->fresh(),
+        ]);
+    }
+
+    public function destroy(Station $station)
+    {
+        DB::transaction(function () use ($station) {
+            $deletedOrder = $station->station_order;
+
+            $station = Station::where('id', $station->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            Station::where('station_order', '>', $deletedOrder)
+                ->lockForUpdate()
+                ->get();
+
+            $station->delete();
+
+            Station::where('station_order', '>', $deletedOrder)
+                ->decrement('station_order');
+        });
+
+        return response()->json(["message" => "Station deleted"]);
+    }
+
+    private function generateStationCode(): string
+    {
+        do {
+            $code = strtoupper(collect(range('A', 'Z'))->random(4)->implode(''));
+        } while (Station::where('station_code', $code)->exists());
+
+        return $code;
+    }
 }

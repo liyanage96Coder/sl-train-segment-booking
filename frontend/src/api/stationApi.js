@@ -1,8 +1,8 @@
 import api from "../services/axios";
 
 
-export const getStations = () => {return api.get("/stations");
-
+export const getStations = () => {
+    return api.get("/stations");
 };
 
 export const addStation = (data) => {

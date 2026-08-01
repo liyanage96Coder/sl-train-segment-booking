@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Trash2, Pencil } from "lucide-react";
 import { getTrains, deleteTrain } from "../../api/trainApi";
 import Table from "../../components/shared/Table/Table.jsx";
 import * as S from "./styles.js";
 
 export default function TrainList() {
+    const navigate = useNavigate();
+
     const [trains, setTrains] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -78,12 +81,18 @@ export default function TrainList() {
             header: "Actions",
             width: "70px",
             render: (train) => (
-                <S.IconButton
-                    onClick={() => handleDelete(train)}
-                    disabled={deletingId === train.id}
-                >
-                    <Trash2 size={14} />
-                </S.IconButton>
+                <S.ActionsCell>
+                    <S.IconButton disabled={deletingId === train.id} onClick={() => navigate(`/train/edit_train/${train.id}`)}>
+                        <Pencil size={14} />
+                    </S.IconButton>
+                    <S.IconButton
+                        $variant="danger"
+                        onClick={() => handleDelete(train)}
+                        disabled={deletingId === train.id}
+                    >
+                        <Trash2 size={14} />
+                    </S.IconButton>
+                </S.ActionsCell>
             ),
         },
     ];

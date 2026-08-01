@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('train_name');
             $table->foreignId('route_id')->constrained()->restrictOnDelete();
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }

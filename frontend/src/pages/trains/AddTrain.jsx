@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react"; import { useParams, useNavigate } from "react-router-dom";
 import { Plus, Trash2, Loader2, TrainFront } from "lucide-react";
 import { getRoutes, getRoute } from "../../api/routesApi";
-import { addTrain } from "../../api/trainApi";
+import { getTrain, addTrain, updateTrain } from "../../api/trainApi";
 import * as S from "./styles.js";
 
 const makeEmptyCoach = () => ({
@@ -11,9 +11,14 @@ const makeEmptyCoach = () => ({
 });
 
 export default function AddTrain() {
+    const { trainId } = useParams();
+    const isEditing = Boolean(trainId);
+    const navigate = useNavigate();
+
     const [trainName, setTrainName] = useState("");
     const [routes, setRoutes] = useState([]);
     const [isLoadingRoutes, setIsLoadingRoutes] = useState(true);
+    const [isLoadingTrain, setIsLoadingTrain] = useState(isEditing);
     const [selectedRouteId, setSelectedRouteId] = useState("");
 
     const [routeStations, setRouteStations] = useState([]);
@@ -24,6 +29,9 @@ export default function AddTrain() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
+    const [hasBookings, setHasBookings] = useState(false);
+    const pendingStopIds = useRef(null);
+    const [originalStopIds, setOriginalStopIds] = useState(new Set());
 
     useEffect(() => {
         getRoutes()
@@ -32,10 +40,23 @@ export default function AddTrain() {
             .finally(() => setIsLoadingRoutes(false));
     }, []);
 
-    // When the route changes, fetch that route's stations (in order) and
-    // default every stop to checked — most trains stop at nearly every
-    // station on their route, so unticking the exceptions is less work
-    // than ticking every single stop by hand.
+    useEffect(() => {
+        if (!isEditing) return;
+
+        getTrain(trainId)
+            .then((res) => {
+                const train = res.data;
+                setTrainName(train.train_name);
+                setSelectedRouteId(train.route_id);
+                setHasBookings(train.has_bookings);
+                const stopIds = train.stops.map((s) => s.id);
+                pendingStopIds.current = stopIds;
+                setOriginalStopIds(new Set(stopIds));
+            })
+            .catch(() => setError("Couldn't load this train."))
+            .finally(() => setIsLoadingTrain(false));
+    }, [trainId, isEditing]);
+
     useEffect(() => {
         if (!selectedRouteId) {
             setRouteStations([]);
@@ -51,11 +72,19 @@ export default function AddTrain() {
                 );
                 setRouteStations(ordered);
 
-                const allChecked = {};
-                ordered.forEach((station) => {
-                    allChecked[station.id] = true;
-                });
-                setStops(allChecked);
+                const checked = {};
+                if (pendingStopIds.current) {
+                    // Editing: restore this train's actual stops, then clear the stash.
+                    ordered.forEach((station) => {
+                        checked[station.id] = pendingStopIds.current.includes(station.id);
+                    });
+                    pendingStopIds.current = null;
+                } else {
+                    ordered.forEach((station) => {
+                        checked[station.id] = true;
+                    });
+                }
+                setStops(checked);
             })
             .catch(() => setError("Could not load stations for that route."))
             .finally(() => setIsLoadingStations(false));
@@ -114,49 +143,69 @@ export default function AddTrain() {
             return;
         }
 
-        if (coaches.length === 0) {
-            setError("Add at least one coach.");
-            return;
-        }
 
-        for (const coach of coaches) {
-            if (
-                !coach.seat_count ||
-                !coach.price_local_per_km ||
-                !coach.price_foreign_per_km
-            ) {
-                setError(
-                    "Fill in seat count and both rates for every coach."
-                );
+        if (!isEditing) {
+            if (coaches.length === 0) {
+                setError("Add at least one coach.");
                 return;
+            }
+
+            for (const coach of coaches) {
+                if (
+                    !coach.seat_count ||
+                    !coach.price_local_per_km ||
+                    !coach.price_foreign_per_km
+                ) {
+                    setError("Fill in seat count and both rates for every coach.");
+                    return;
+                }
             }
         }
 
         setIsSubmitting(true);
 
         try {
-            await addTrain({
-                train_name: trainName.trim(),
-                route_id: Number(selectedRouteId),
-                stop_station_ids: selectedStopIds,
-                coaches: coaches.map((c) => ({
-                    seat_count: Number(c.seat_count),
-                    price_local_per_km: Number(c.price_local_per_km),
-                    price_foreign_per_km: Number(c.price_foreign_per_km),
-                })),
-            });
+            if (isEditing) {
+                await updateTrain(trainId, {
+                    train_name: trainName.trim(),
+                    stop_station_ids: selectedStopIds,
+                });
+            } else {
+                await addTrain({
+                    train_name: trainName.trim(),
+                    route_id: Number(selectedRouteId),
+                    stop_station_ids: selectedStopIds,
+                    coaches: coaches.map((c) => ({
+                        seat_count: Number(c.seat_count),
+                        price_local_per_km: Number(c.price_local_per_km),
+                        price_foreign_per_km: Number(c.price_foreign_per_km),
+                    })),
+                });
+            }
 
-            resetForm();
+            navigate("/trains");
         } catch (err) {
-            setError(err.response?.data?.message || "Could not create train.");
+            setError(
+                err.response?.data?.message ||
+                (isEditing ? "Could not update train." : "Could not create train.")
+            );
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    if (isLoadingTrain) {
+        return (
+            <S.WrapperTrain>
+                <S.HeadingTrain>Edit Train</S.HeadingTrain>
+                <p>Loading train…</p>
+            </S.WrapperTrain>
+        );
+    }
+
     return (
         <S.WrapperTrain>
-            <S.HeadingTrain>Add Train</S.HeadingTrain>
+            <S.HeadingTrain>{isEditing ? "Edit Train" : "Add Train"}</S.HeadingTrain>
 
             <form onSubmit={handleSubmit}>
                 <S.Input
@@ -171,7 +220,7 @@ export default function AddTrain() {
                 <S.Select
                     value={selectedRouteId}
                     onChange={(e) => setSelectedRouteId(e.target.value)}
-                    disabled={isSubmitting || isLoadingRoutes}
+                    disabled={isSubmitting || isLoadingRoutes || isEditing}
                 >
                     <option value="">
                         {isLoadingRoutes ? "Loading routes…" : "Select a route"}
@@ -182,6 +231,11 @@ export default function AddTrain() {
                         </option>
                     ))}
                 </S.Select>
+                {isEditing && (
+                    <S.HelperText>
+                        Route can't be changed after a train is created.
+                    </S.HelperText>
+                )}
 
                 {selectedRouteId && (
                     <>
@@ -190,7 +244,9 @@ export default function AddTrain() {
                             {routeStations.length} selected)
                         </S.SectionLabel>
                         <S.HelperText>
-                            All stations start ticked — untick any this train skips.
+                            {hasBookings
+                                ? "This train already has bookings, so its stops can't be changed."
+                                : "All stations start ticked — untick any this train skips."}
                         </S.HelperText>
                         <S.StopList style={{ marginTop: 8 }}>
                             {isLoadingStations && (
@@ -204,7 +260,7 @@ export default function AddTrain() {
                                             type="checkbox"
                                             checked={!!stops[station.id]}
                                             onChange={() => toggleStop(station.id)}
-                                            disabled={isSubmitting}
+                                            disabled={isSubmitting || (hasBookings && originalStopIds.has(station.id))}
                                         />
                                         <S.StopName>
                                             {station.pivot.stop_order}. {station.station_name} (
@@ -216,86 +272,90 @@ export default function AddTrain() {
                     </>
                 )}
 
-                <S.SectionLabel>Coaches</S.SectionLabel>
+                {!hasBookings  && (
+                    <>
+                        <S.SectionLabel>Coaches</S.SectionLabel>
 
-                {coaches.map((coach, index) => (
-                    <S.CoachCard key={index}>
-                        <S.CoachTitle>Coach {index + 1}</S.CoachTitle>
+                        {coaches.map((coach, index) => (
+                            <S.CoachCard key={index}>
+                                <S.CoachTitle>Coach {index + 1}</S.CoachTitle>
 
-                        {coaches.length > 1 && (
-                            <S.RemoveCoachButton
-                                type="button"
-                                onClick={() => removeCoachRow(index)}
-                                disabled={isSubmitting}
-                            >
-                                <Trash2 size={12} />
-                            </S.RemoveCoachButton>
-                        )}
+                                {coaches.length > 1 && (
+                                    <S.RemoveCoachButton
+                                        type="button"
+                                        onClick={() => removeCoachRow(index)}
+                                        disabled={isSubmitting}
+                                    >
+                                        <Trash2 size={12} />
+                                    </S.RemoveCoachButton>
+                                )}
 
-                        <S.CoachFieldRow>
-                            <S.CoachFieldGroup>
-                                <S.CoachFieldLabel>Seats</S.CoachFieldLabel>
-                                <S.Input
-                                    type="number"
-                                    min="1"
-                                    placeholder="e.g. 60"
-                                    value={coach.seat_count}
-                                    onChange={(e) =>
-                                        handleCoachChange(index, "seat_count", e.target.value)
-                                    }
-                                    disabled={isSubmitting}
-                                />
-                            </S.CoachFieldGroup>
+                                <S.CoachFieldRow>
+                                    <S.CoachFieldGroup>
+                                        <S.CoachFieldLabel>Seats</S.CoachFieldLabel>
+                                        <S.Input
+                                            type="number"
+                                            min="1"
+                                            placeholder="e.g. 60"
+                                            value={coach.seat_count}
+                                            onChange={(e) =>
+                                                handleCoachChange(index, "seat_count", e.target.value)
+                                            }
+                                            disabled={isSubmitting}
+                                        />
+                                    </S.CoachFieldGroup>
 
-                            <S.CoachFieldGroup>
-                                <S.CoachFieldLabel>Local Rate (LKR/km)</S.CoachFieldLabel>
-                                <S.Input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="e.g. 12.50"
-                                    value={coach.price_local_per_km}
-                                    onChange={(e) =>
-                                        handleCoachChange(
-                                            index,
-                                            "price_local_per_km",
-                                            e.target.value
-                                        )
-                                    }
-                                    disabled={isSubmitting}
-                                />
-                            </S.CoachFieldGroup>
+                                    <S.CoachFieldGroup>
+                                        <S.CoachFieldLabel>Local Rate (LKR/km)</S.CoachFieldLabel>
+                                        <S.Input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="e.g. 12.50"
+                                            value={coach.price_local_per_km}
+                                            onChange={(e) =>
+                                                handleCoachChange(
+                                                    index,
+                                                    "price_local_per_km",
+                                                    e.target.value
+                                                )
+                                            }
+                                            disabled={isSubmitting}
+                                        />
+                                    </S.CoachFieldGroup>
 
-                            <S.CoachFieldGroup>
-                                <S.CoachFieldLabel>Foreign Rate (USD/km)</S.CoachFieldLabel>
-                                <S.Input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="e.g. 0.15"
-                                    value={coach.price_foreign_per_km}
-                                    onChange={(e) =>
-                                        handleCoachChange(
-                                            index,
-                                            "price_foreign_per_km",
-                                            e.target.value
-                                        )
-                                    }
-                                    disabled={isSubmitting}
-                                />
-                            </S.CoachFieldGroup>
-                        </S.CoachFieldRow>
-                    </S.CoachCard>
-                ))}
+                                    <S.CoachFieldGroup>
+                                        <S.CoachFieldLabel>Foreign Rate (USD/km)</S.CoachFieldLabel>
+                                        <S.Input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="e.g. 0.15"
+                                            value={coach.price_foreign_per_km}
+                                            onChange={(e) =>
+                                                handleCoachChange(
+                                                    index,
+                                                    "price_foreign_per_km",
+                                                    e.target.value
+                                                )
+                                            }
+                                            disabled={isSubmitting}
+                                        />
+                                    </S.CoachFieldGroup>
+                                </S.CoachFieldRow>
+                            </S.CoachCard>
+                        ))}
 
-                <S.AddCoachButton
-                    type="button"
-                    onClick={addCoachRow}
-                    disabled={isSubmitting}
-                >
-                    <Plus size={16} />
-                    Add New Coach
-                </S.AddCoachButton>
+                        <S.AddCoachButton
+                            type="button"
+                            onClick={addCoachRow}
+                            disabled={isSubmitting}
+                        >
+                            <Plus size={16} />
+                            Add New Coach
+                        </S.AddCoachButton>
+                    </>
+                )}
 
                 {error && <S.ErrorTextTrain>{error}</S.ErrorTextTrain>}
 
@@ -305,7 +365,7 @@ export default function AddTrain() {
                     ) : (
                         <TrainFront size={16} />
                     )}
-                    Create Train
+                    {isEditing ? "Save Changes" : "Create Train"}
                 </S.SubmitButton>
             </form>
         </S.WrapperTrain>

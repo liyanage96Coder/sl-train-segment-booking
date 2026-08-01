@@ -46,18 +46,26 @@ export const IconButton = styled.button`
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  background: #fef2f2;
-  color: #dc2626;
   transition: background 0.15s ease;
 
+  background: ${({ $variant }) =>
+    $variant === "danger" ? "#fef2f2" : "#eef2ff"};
+  color: ${({ $variant }) => ($variant === "danger" ? "#dc2626" : "#4f46e5")};
+
   &:hover:not(:disabled) {
-    background: #fee2e2;
+    background: ${({ $variant }) =>
+    $variant === "danger" ? "#fee2e2" : "#e0e7ff"};
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+`;
+
+export const ActionsCell = styled.div`
+  display: flex;
+  gap: 8px;
 `;
 
 //Add Train

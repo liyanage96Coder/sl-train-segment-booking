@@ -1,18 +1,46 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, Route as RouteIcon } from "lucide-react";
 import { getStations } from "../../api/stationApi";
-import { addRoute } from "../../api/routesApi";
+import { addRoute, getRoute, updateRoute } from "../../api/routesApi";
 import * as S from "./styles.js";
 
 export default function AddRoute() {
+    const { routeId } = useParams(); // undefined when adding, a string when editing
+    const isEditing = Boolean(routeId);
+    const navigate = useNavigate();
+
     const [stations, setStations] = useState([]);
     const [isLoadingStations, setIsLoadingStations] = useState(true);
+    const [isLoadingRoute, setIsLoadingRoute] = useState(isEditing);
     const [routeName, setRouteName] = useState("");
     // Map of stationId -> stop_order, only present for checked stations.
     const [selected, setSelected] = useState({});
     const [distances, setDistances] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
+
+    // Load the existing route (only in edit mode) and seed selected/distances from it.
+    useEffect(() => {
+        if (!isEditing) return;
+
+        getRoute(routeId)
+            .then((res) => {
+                const route = res.data;
+                setRouteName(route.route_name);
+
+                const nextSelected = {};
+                const nextDistances = {};
+                route.stations.forEach((s) => {
+                    nextSelected[s.id] = s.pivot.stop_order;
+                    nextDistances[s.id] = s.pivot.distance_km;
+                });
+                setSelected(nextSelected);
+                setDistances(nextDistances);
+            })
+            .catch(() => setError("Couldn't load this route."))
+            .finally(() => setIsLoadingRoute(false));
+    }, [routeId, isEditing]);
 
     useEffect(() => {
         getStations()
@@ -46,8 +74,8 @@ export default function AddRoute() {
 
             if (station.id in next) {
                 delete next[station.id];
-                setDistances((prev) => {
-                    const { [station.id]: _, ...rest } = prev;
+                setDistances((prevDist) => {
+                    const { [station.id]: _, ...rest } = prevDist;
                     return rest;
                 });
                 const remaining = Object.entries(next).sort((a, b) => a[1] - b[1]);
@@ -107,28 +135,44 @@ export default function AddRoute() {
         setError(null);
         setIsSubmitting(true);
 
-        try {
-            await addRoute({
-                route_name: routeName.trim(),
-                stations: Object.entries(selected).map(([station_id, stop_order]) => ({
-                    station_id: Number(station_id),
-                    stop_order,
-                    distance_km: Number(distances[station_id] || 0),
-                })),
-            });
+        const payload = {
+            route_name: routeName.trim(),
+            stations: Object.entries(selected).map(([station_id, stop_order]) => ({
+                station_id: Number(station_id),
+                stop_order,
+                distance_km: Number(distances[station_id] || 0),
+            })),
+        };
 
-            setRouteName("");
-            setSelected({});
+        try {
+            if (isEditing) {
+                await updateRoute(routeId, payload);
+            } else {
+                await addRoute(payload);
+            }
+            navigate("/routes");
         } catch (err) {
-            setError(err.response?.data?.message || "Could not create route.");
+            setError(
+                err.response?.data?.message ||
+                (isEditing ? "Could not update route." : "Could not create route.")
+            );
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    if (isLoadingRoute) {
+        return (
+            <S.Wrapper>
+                <S.Heading>Edit Route</S.Heading>
+                <p>Loading route…</p>
+            </S.Wrapper>
+        );
+    }
+
     return (
         <S.Wrapper>
-            <S.Heading>Add Route</S.Heading>
+            <S.Heading>{isEditing ? "Edit Route" : "Add Route"}</S.Heading>
 
             <form onSubmit={handleSubmit}>
                 <S.Input
@@ -202,7 +246,7 @@ export default function AddRoute() {
                     ) : (
                         <RouteIcon size={16} />
                     )}
-                    Create Route
+                    {isEditing ? "Save Changes" : "Create Route"}
                 </S.SubmitButton>
             </form>
         </S.Wrapper>

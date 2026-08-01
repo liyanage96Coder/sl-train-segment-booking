@@ -105,7 +105,7 @@ export default function StationList() {
                         onChange={(e) =>
                             setEditForm((prev) => ({ ...prev, station_code: e.target.value }))
                         }
-                        disabled={isSaving}
+                        disabled={true}
                     />
                 ) : (
                     row.station_code

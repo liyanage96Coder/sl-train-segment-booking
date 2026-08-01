@@ -8,19 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('train_station', function (Blueprint $table) {
+        Schema::create('seats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('train_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('station_id')->constrained()->restrictOnDelete();
+            $table->foreignId('train_coach_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('seat_number');
             $table->boolean('active')->default(true);
             $table->timestamps();
 
-            $table->unique(['train_id', 'station_id']);
+            $table->unique(['train_coach_id', 'seat_number']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('train_station');
+        Schema::dropIfExists('seats');
     }
 };

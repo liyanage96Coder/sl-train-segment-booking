@@ -8,19 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('train_station', function (Blueprint $table) {
+        Schema::create('trips', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('train_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('station_id')->constrained()->restrictOnDelete();
+            $table->foreignId('train_id')->constrained()->restrictOnDelete();
+            $table->date('travel_date');
             $table->boolean('active')->default(true);
             $table->timestamps();
 
-            $table->unique(['train_id', 'station_id']);
+            $table->unique(['train_id', 'travel_date']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('train_station');
+        Schema::dropIfExists('trips');
     }
 };

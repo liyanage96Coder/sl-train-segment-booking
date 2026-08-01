@@ -15,6 +15,7 @@ return new class extends Migration
             $table->unsignedInteger('seat_count');
             $table->decimal('price_local_per_km', 10, 2);
             $table->decimal('price_foreign_per_km', 10, 2);
+            $table->boolean('active')->default(true);
             $table->timestamps();
 
             $table->unique(['train_id', 'coach_number']);
