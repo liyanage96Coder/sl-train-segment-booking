@@ -19,4 +19,10 @@ class Station extends Model
         'station_order'=>'integer'
     ];
 
+    public function routes()
+    {
+        return $this->belongsToMany(Route::class, 'route_station')
+            ->withPivot('stop_order');
+    }
+
 }

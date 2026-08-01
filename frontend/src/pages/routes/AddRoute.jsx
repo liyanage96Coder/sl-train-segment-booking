@@ -1,0 +1,191 @@
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, Route as RouteIcon } from "lucide-react";
+import { getStations } from "../../api/stationApi";
+import { addRoute } from "../../api/routesApi";
+import * as S from "./styles.js";
+
+export default function AddRoute() {
+    const [stations, setStations] = useState([]);
+    const [isLoadingStations, setIsLoadingStations] = useState(true);
+    const [routeName, setRouteName] = useState("");
+    // Map of stationId -> stop_order, only present for checked stations.
+    const [selected, setSelected] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        getStations()
+            .then((res) => setStations(res.data))
+            .catch(() => setError("Could not load stations."))
+            .finally(() => setIsLoadingStations(false));
+    }, []);
+
+    const selectedCount = Object.keys(selected).length;
+
+    // Numbers already claimed by OTHER stations — used to filter each
+    // dropdown's own options so no two stations can hold the same order.
+    const usedOrdersExcluding = (stationId) =>
+        new Set(
+            Object.entries(selected)
+                .filter(([id]) => Number(id) !== stationId)
+                .map(([, order]) => order)
+        );
+
+    const smallestAvailableOrder = (excludeStationId) => {
+        const used = usedOrdersExcluding(excludeStationId);
+        for (let n = 1; n <= selectedCount + 1; n += 1) {
+            if (!used.has(n)) return n;
+        }
+        return selectedCount + 1;
+    };
+
+    const handleToggle = (station) => {
+        setSelected((prev) => {
+            const next = { ...prev };
+
+            if (station.id in next) {
+                // Unchecking: remove it, then compact remaining orders down so
+                // there's never a gap (e.g. removing #2 out of [1,2,3] leaves
+                // [1,3] otherwise, and the "must be 1..N" rule would break).
+                delete next[station.id];
+                const remaining = Object.entries(next).sort((a, b) => a[1] - b[1]);
+                remaining.forEach(([id], index) => {
+                    next[id] = index + 1;
+                });
+            } else {
+                next[station.id] = smallestAvailableOrder(station.id);
+            }
+
+            return next;
+        });
+    };
+
+    const handleOrderChange = (stationId, newOrder) => {
+        setSelected((prev) => ({ ...prev, [stationId]: Number(newOrder) }));
+    };
+
+    const orderOptionsFor = (stationId) => {
+        const used = usedOrdersExcluding(stationId);
+        const options = [];
+        for (let n = 1; n <= selectedCount; n += 1) {
+            if (!used.has(n) || n === selected[stationId]) {
+                options.push(n);
+            }
+        }
+        return options;
+    };
+
+    const stationRows = useMemo(
+        () =>
+            stations.map((station) => ({
+                ...station,
+                isChecked: station.id in selected,
+                order: selected[station.id],
+            })),
+        [stations, selected]
+    );
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!routeName.trim()) {
+            setError("Please enter a route name.");
+            return;
+        }
+
+        if (selectedCount < 2) {
+            setError("Select at least two stations for the route.");
+            return;
+        }
+
+        setError(null);
+        setIsSubmitting(true);
+
+        try {
+            await addRoute({
+                route_name: routeName.trim(),
+                stations: Object.entries(selected).map(([station_id, stop_order]) => ({
+                    station_id: Number(station_id),
+                    stop_order,
+                })),
+            });
+
+            setRouteName("");
+            setSelected({});
+        } catch (err) {
+            setError(err.response?.data?.message || "Could not create route.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <S.Wrapper>
+            <S.Heading>Add Route</S.Heading>
+
+            <form onSubmit={handleSubmit}>
+                <S.Input
+                    type="text"
+                    placeholder="Route name (e.g. Colombo Fort - Badulla Express)"
+                    value={routeName}
+                    onChange={(e) => setRouteName(e.target.value)}
+                    disabled={isSubmitting}
+                />
+
+                {error && <S.ErrorText>{error}</S.ErrorText>}
+
+                <S.HelperText>
+                    Check the stations on this route, then set the order each one is
+                    reached in.
+                </S.HelperText>
+
+                <S.StationList>
+                    {isLoadingStations && (
+                        <S.StationRow as="div">Loading stations…</S.StationRow>
+                    )}
+
+                    {!isLoadingStations &&
+                        stationRows.map((station) => (
+                            <S.StationRow key={station.id}>
+                                <S.Checkbox
+                                    type="checkbox"
+                                    checked={station.isChecked}
+                                    onChange={() => handleToggle(station)}
+                                    disabled={isSubmitting}
+                                />
+
+                                <S.StationName>
+                                    {station.station_name} ({station.station_code})
+                                </S.StationName>
+
+                                {station.isChecked && (
+                                    <S.OrderSelect
+                                        value={station.order}
+                                        onChange={(e) =>
+                                            handleOrderChange(station.id, e.target.value)
+                                        }
+                                        disabled={isSubmitting}
+                                    >
+                                        {orderOptionsFor(station.id).map((n) => (
+                                            <option key={n} value={n}>
+                                                {n}
+                                            </option>
+                                        ))}
+                                    </S.OrderSelect>
+                                )}
+                            </S.StationRow>
+                        ))}
+                </S.StationList>
+
+                <S.SubmitButton type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                        <Loader2 size={16} className="spin" />
+                    ) : (
+                        <RouteIcon size={16} />
+                    )}
+                    Create Route
+                </S.SubmitButton>
+            </form>
+        </S.Wrapper>
+    );
+}
