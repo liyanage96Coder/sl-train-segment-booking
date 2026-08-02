@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"; import { useParams, useNavigate } from "react-router-dom";
 import { Plus, Trash2, Loader2, TrainFront } from "lucide-react";
+import Header from "../../components/shared/Header/Header.jsx";
 import { getRoutes, getRoute } from "../../api/routesApi";
 import { getTrain, addTrain, updateTrain } from "../../api/trainApi";
 import * as S from "./styles.js";
@@ -205,6 +206,12 @@ export default function AddTrain() {
 
     return (
         <S.WrapperTrain>
+            <Header
+                title="Stations"
+                subtitle="Manage the master list of stations on the network."
+                addNewPath="/stations/add"
+                addNewLabel="Add Station"
+            />
             <S.HeadingTrain>{isEditing ? "Edit Train" : "Add Train"}</S.HeadingTrain>
 
             <form onSubmit={handleSubmit}>
@@ -272,7 +279,7 @@ export default function AddTrain() {
                     </>
                 )}
 
-                {!hasBookings  && (
+                {!hasBookings && (
                     <>
                         <S.SectionLabel>Coaches</S.SectionLabel>
 

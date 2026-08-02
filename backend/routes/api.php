@@ -21,16 +21,11 @@ Route::prefix('routes')->group(function(){
     Route::delete('/{route}', [RouteController::class, 'destroy']);
 });
 
-Route::prefix('trains')->group(function(){
-    Route::get('/',[TrainController::class,'index']);
-    Route::get('/{train}', [TrainController::class, 'show']);
-    Route::post('/',[TrainController::class,'store']);
-    Route::put('/{train}', [TrainController::class, 'update']);
-    Route::delete('/{train}', [TrainController::class, 'destroy']);
-});
-
 Route::get('/trains/for-leg', [TrainController::class, 'forLeg']);
 Route::get('/trains/{train}/seat-map', [TrainController::class, 'seatMap']);
 Route::apiResource('trains', TrainController::class)->only(['index', 'store', 'destroy']);
 
 Route::post('/bookings', [BookingController::class, 'store']);
+Route::get('/get-bookings', [BookingController::class, 'index']);
+Route::get('/trains/{train}/schedule', [TrainController::class, 'schedule']);
+Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);

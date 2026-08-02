@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trash2, Pencil } from "lucide-react";
+import Header from "../../components/shared/Header/Header.jsx";
 import { getTrains, deleteTrain } from "../../api/trainApi";
 import Table from "../../components/shared/Table/Table.jsx";
 import * as S from "./styles.js";
@@ -99,6 +100,12 @@ export default function TrainList() {
 
     return (
         <S.Wrapper>
+            <Header
+                title="Stations"
+                subtitle="Manage the master list of stations on the network."
+                addNewPath="/stations/add"
+                addNewLabel="Add Station"
+            />
             <S.Heading>Trains</S.Heading>
 
             {error && <S.ErrorText>{error}</S.ErrorText>}

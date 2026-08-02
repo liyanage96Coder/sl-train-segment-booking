@@ -194,4 +194,75 @@ class TrainController extends Controller
             'coaches' => $coaches,
         ]);
     }
+
+    public function schedule(Request $request, Train $train)
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        $train->load(['route.stations', 'coaches.seats']);
+
+        $trip = Trip::where('train_id', $train->id)
+            ->where('travel_date', $validated['date'])
+            ->first();
+
+        $routeStations = $train->route->stations;
+        $stopOrderByStation = $routeStations->pluck('pivot.stop_order', 'id');
+
+        $bookingsData = collect();
+
+        if ($trip) {
+            $bookingsData = DB::table('booking_seats')
+                ->join('bookings', 'bookings.id', '=', 'booking_seats.booking_id')
+                ->where('booking_seats.trip_id', $trip->id)
+                ->select(
+                    'booking_seats.id as booking_seat_id',
+                    'booking_seats.seat_id',
+                    'booking_seats.passenger_type',
+                    'booking_seats.fare',
+                    'bookings.id as booking_id',
+                    'bookings.passenger_name',
+                    'bookings.from_station_id',
+                    'bookings.to_station_id'
+                )
+                ->get()
+                ->map(function ($row) use ($stopOrderByStation, $routeStations) {
+                    $fromStation = $routeStations->firstWhere('id', $row->from_station_id);
+                    $toStation = $routeStations->firstWhere('id', $row->to_station_id);
+
+                    return [
+                        'booking_seat_id' => $row->booking_seat_id,
+                        'booking_id' => $row->booking_id,
+                        'seat_id' => $row->seat_id,
+                        'passenger_type' => $row->passenger_type,
+                        'passenger_name' => $row->passenger_name,
+                        'fare' => $row->fare,
+                        'from_stop_order' => $stopOrderByStation[$row->from_station_id] ?? null,
+                        'to_stop_order' => $stopOrderByStation[$row->to_station_id] ?? null,
+                        'from_station_name' => $fromStation->station_name ?? null,
+                        'to_station_name' => $toStation->station_name ?? null,
+                    ];
+                });
+        }
+
+        return response()->json([
+            'trip_id' => $trip?->id,
+            'route_stations' => $routeStations->map(fn ($s) => [
+                'id' => $s->id,
+                'station_name' => $s->station_name,
+                'stop_order' => $s->pivot->stop_order,
+            ]),
+            'coaches' => $train->coaches->map(fn ($c) => [
+                'id' => $c->id,
+                'coach_number' => $c->coach_number,
+                'seats' => $c->seats->map(fn ($seat) => [
+                    'id' => $seat->id,
+                    'seat_number' => $seat->seat_number,
+                ]),
+            ]),
+            'bookings' => $bookingsData->values(),
+        ]);
+    }
+
 }

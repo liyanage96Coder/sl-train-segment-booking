@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -10,6 +11,18 @@ use Illuminate\Validation\ValidationException;
 class BookingController extends Controller
 {
     public function __construct(private BookingService $bookingService) {}
+
+    public function index()
+    {
+        $bookings = Booking::with([
+            'trip.train',
+            'fromStation',
+            'toStation',
+            'bookingSeats',
+        ])->latest()->get();
+
+        return response()->json($bookings);
+    }
 
     public function store(Request $request)
     {
@@ -37,5 +50,12 @@ class BookingController extends Controller
             'message' => 'Booking confirmed',
             'data' => $booking,
         ], 201);
+    }
+
+    
+    public function destroy(Booking $booking)
+    {
+        $booking->delete();
+        return response()->json(['message' => 'Booking deleted']);
     }
 }

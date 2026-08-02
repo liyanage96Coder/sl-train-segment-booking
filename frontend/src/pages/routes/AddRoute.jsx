@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, Route as RouteIcon } from "lucide-react";
+import Header from "../../components/shared/Header/Header.jsx";
 import { getStations } from "../../api/stationApi";
 import { addRoute, getRoute, updateRoute } from "../../api/routesApi";
 import * as S from "./styles.js";
@@ -172,6 +173,12 @@ export default function AddRoute() {
 
     return (
         <S.Wrapper>
+            <Header
+                title="Stations"
+                subtitle="Manage the master list of stations on the network."
+                addNewPath="/stations/add"
+                addNewLabel="Add Station"
+            />
             <S.Heading>{isEditing ? "Edit Route" : "Add Route"}</S.Heading>
 
             <form onSubmit={handleSubmit}>

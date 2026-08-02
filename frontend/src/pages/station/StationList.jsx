@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import { getStations, updateStation, deleteStation } from "../../api/stationApi";
 import Table from "../../components/shared/Table/Table.jsx";
+import Header from "../../components/shared/Header/Header.jsx";
 import * as S from "./styles.js";
 
 export default function StationList() {
@@ -165,6 +166,12 @@ export default function StationList() {
 
     return (
         <S.WrapperList>
+            <Header
+                title="Stations"
+                subtitle="Manage the master list of stations on the network."
+                addNewPath="/stations/add"
+                addNewLabel="Add Station"
+            />
             <S.HeadingList>Stations</S.HeadingList>
 
             {error && <S.ErrorTextList>{error}</S.ErrorTextList>}

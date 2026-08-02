@@ -19,3 +19,10 @@ export const getSeatMap = (trainId, travelDate, fromStationId, toStationId) =>
     });
 
 export const createBooking = (data) => api.post("/bookings", data);
+
+export const getBookings = () => api.get("/get-bookings");
+
+export const getTrainSchedule = (trainId, date) =>
+    api.get(`/trains/${trainId}/schedule`, { params: { date } });
+
+export const deleteBooking = (id) => api.delete(`/bookings/${id}`);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
+import Header from "../../components/shared/Header/Header.jsx";
 import { getStations, addStation } from "../../api/stationApi";
 import * as S from "./styles.js";
 
@@ -61,6 +62,12 @@ export default function AddStation() {
 
     return (
         <S.Wrapper>
+            <Header
+                title="Stations"
+                subtitle="Manage the master list of stations on the network."
+                addNewPath="/stations/add"
+                addNewLabel="Add Station"
+            />
             <S.Heading>Route Stations</S.Heading>
 
             <S.FormRow>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
+import Header from "../../components/shared/Header/Header.jsx";
 import { getRoutes, deleteRoute } from "../../api/routesApi";
 import Table from "../../components/shared/Table/Table.jsx";
 import * as S from "./styles.js";
@@ -84,6 +85,12 @@ export default function RouteList() {
 
     return (
         <S.Wrapper>
+            <Header
+                title="Stations"
+                subtitle="Manage the master list of stations on the network."
+                addNewPath="/stations/add"
+                addNewLabel="Add Station"
+            />
             <S.Heading>Routes</S.Heading>
 
             {error && <S.ErrorText>{error}</S.ErrorText>}
