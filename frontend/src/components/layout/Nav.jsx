@@ -3,6 +3,7 @@ import { TicketCheck, MapPin, Route as RouteIcon, TrainFront } from "lucide-reac
 import * as S from "./styles.js";
 
 const links = [
+    { to: "/dashboard", label: "Dashboard", icon: TicketCheck },
     { to: "/book_seat", label: "Book a Seat", icon: TicketCheck },
     { to: "/stations", label: "Stations", icon: MapPin },
     { to: "/routes", label: "Routes", icon: RouteIcon },

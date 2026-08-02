@@ -9,7 +9,7 @@ import AddTrain from "./pages/trains/AddTrain";
 import TrainList from "./pages/trains/TrainList";
 import BookSeat from "./pages/BookSeat/BookSeat";
 import BookingList from "./pages/BookingList/BookingList";
-
+import Dashboard from "./pages/Dashboard/Dashboard.jsx";
 
 
 
@@ -24,6 +24,8 @@ function App() {
 
         <Layout.ContentColumn>
           <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            
             <Route path="/stations" element={<StationList />} />
             <Route path="/station/add_station" element={<AddStation />} />
 

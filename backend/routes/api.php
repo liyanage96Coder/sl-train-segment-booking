@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\StationController;
 use App\Http\Controllers\Api\RouteController;
 use App\Http\Controllers\Api\TrainController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\DashboardController;
 
 Route::prefix('stations')->group(function(){
     Route::get('/',[StationController::class,'index']);
@@ -29,3 +30,5 @@ Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/get-bookings', [BookingController::class, 'index']);
 Route::get('/trains/{train}/schedule', [TrainController::class, 'schedule']);
 Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
+
+Route::get('/dashboard', [DashboardController::class, 'index']);
