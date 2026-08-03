@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('station_id')->constrained()->restrictOnDelete();
             $table->unsignedInteger('stop_order');
             $table->decimal('distance_km', 8, 2);
-            $table->boolean('active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
 
             // A station can only appear once per route, and a stop_order

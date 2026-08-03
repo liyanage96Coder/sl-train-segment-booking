@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('train_coach_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('seat_number');
-            $table->boolean('active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['train_coach_id', 'seat_number']);

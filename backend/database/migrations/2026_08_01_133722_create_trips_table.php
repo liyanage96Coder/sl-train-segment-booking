@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('train_id')->constrained()->restrictOnDelete();
             $table->date('travel_date');
-            $table->boolean('active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['train_id', 'travel_date']);

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedInteger('local_count');
             $table->unsignedInteger('foreign_count');
             $table->decimal('total_fare', 10, 2);
-            $table->boolean('active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

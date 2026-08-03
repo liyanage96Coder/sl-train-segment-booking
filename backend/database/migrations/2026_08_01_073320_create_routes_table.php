@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('routes', function (Blueprint $table) {
             $table->id();
-           $table->string('route_name')->unique();
-            $table->boolean('active')->default(true);
+            $table->string('route_name')->unique();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

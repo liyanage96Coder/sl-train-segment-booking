@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('trip_id')->constrained()->restrictOnDelete();
             $table->enum('passenger_type', ['local', 'foreign']);
             $table->decimal('fare', 10, 2);
-            $table->boolean('active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
 
             $table->index(['seat_id', 'trip_id']);

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('station_name');
             $table->string('station_code',10)->unique();
             $table->integer('station_order')->unique();
-            $table->boolean('active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
