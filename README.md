@@ -279,6 +279,7 @@ clicking a block shows passenger/fare details with a delete action.
 
 - Real-time seat map updates via polling or Laravel Reverb/WebSocket broadcasting, so a
   seat goes red for other viewers the moment it's booked, not just on next fetch.
+- Apply JWT token for admin operations.
 - Edit forms for routes/trains (currently create + delete only; editing an existing
   route's stations mid-flight also needs a policy decision about what happens to
   bookings already made against the old station order).
