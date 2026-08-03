@@ -70,7 +70,7 @@ export const SubmitButton = styled.button`
   padding: 10px;
   border: none;
   border-radius: 8px;
-  background: #4f46e5;
+  background: #3F0997;
   color: #fff;
   font-weight: 600;
   font-size: 0.9rem;

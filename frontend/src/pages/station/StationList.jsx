@@ -169,7 +169,7 @@ export default function StationList() {
             <Header
                 title="Stations"
                 subtitle="Manage the master list of stations on the network."
-                addNewPath="/stations/add"
+                addNewPath="/admin/station/add_station"
                 addNewLabel="Add Station"
             />
             <S.HeadingList>Stations</S.HeadingList>

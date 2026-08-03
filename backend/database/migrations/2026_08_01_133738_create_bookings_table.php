@@ -14,6 +14,9 @@ return new class extends Migration
             $table->foreignId('from_station_id')->constrained('stations')->restrictOnDelete();
             $table->foreignId('to_station_id')->constrained('stations')->restrictOnDelete();
             $table->string('passenger_name')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->boolean('email_verified')->default(false);
             $table->unsignedInteger('local_count');
             $table->unsignedInteger('foreign_count');
             $table->decimal('total_fare', 10, 2);

@@ -31,6 +31,7 @@ export const Td = styled.td`
   color: #1f2937;
   border-bottom: 1px solid #f3f4f6;
   vertical-align: middle;
+  text-align: justify;
 `;
 
 export const Tr = styled.tr`

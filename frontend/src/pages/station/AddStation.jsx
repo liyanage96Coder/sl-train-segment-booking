@@ -63,10 +63,8 @@ export default function AddStation() {
     return (
         <S.Wrapper>
             <Header
-                title="Stations"
-                subtitle="Manage the master list of stations on the network."
-                addNewPath="/stations/add"
-                addNewLabel="Add Station"
+                title="Add Stations"
+                subtitle="Add stations on the network."
             />
             <S.Heading>Route Stations</S.Heading>
 

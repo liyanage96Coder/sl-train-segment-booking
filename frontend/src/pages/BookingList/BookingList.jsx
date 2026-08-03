@@ -45,6 +45,24 @@ export default function BookingList() {
             render: (booking) => <S.DateText>{booking.trip.travel_date}</S.DateText>,
         },
         {
+            key: "phone",
+            header: "Phone",
+            width: "120px",
+            render: (booking) => <S.RouteText>{booking.phone || "—"}</S.RouteText>,
+        },
+        {
+            key: "email",
+            header: "Email",
+            render: (booking) => (
+                <S.RouteText>
+                    {booking.email || "—"}
+                    {booking.email_verified && (
+                        <S.VerifiedTag title="Email verified"> ✓</S.VerifiedTag>
+                    )}
+                </S.RouteText>
+            ),
+        },
+        {
             key: "from",
             header: "Start Station",
             render: (booking) => (

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Calendar } from "lucide-react";
 import Header from "../Header/Header.jsx";
 import { getTrains } from "../../../api/trainApi.js";
 import { getTrainSchedule, deleteBooking, getBookedDates } from "../../../api/bookingApi.js";
@@ -155,10 +156,10 @@ export default function TrainSchedule() {
                             <S.CalendarTitle>
                                 {MONTHS[viewMonth]} {viewYear}
                             </S.CalendarTitle>
-                            <div>
+                            <S.NavWrapper>
                                 <S.NavButton onClick={goPrevMonth}>‹</S.NavButton>
                                 <S.NavButton onClick={goNextMonth}>›</S.NavButton>
-                            </div>
+                            </S.NavWrapper>
                         </S.CalendarHeader>
 
                         <S.CalendarGrid>
@@ -236,8 +237,11 @@ export default function TrainSchedule() {
                             ))}
                         </S.GridArea>
                     </S.CoachWrapper>
-                ):(
-                "Please select a train and date to check availability."
+                ) : (
+                    <S.MsgWrapper>
+                        <Calendar size={60} className="spin" />
+                        "Please select a train and date to check availability."
+                    </S.MsgWrapper>
                 )}
             </S.ContentWrapper>
 

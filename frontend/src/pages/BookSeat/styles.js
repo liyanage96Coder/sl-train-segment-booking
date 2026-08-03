@@ -11,8 +11,10 @@ export const LoginWrapper = styled.div`
 `;
 
 export const LoginButton = styled.button`
+  display: inline-flex;
+  gap: 6px;
   padding: 10px 24px;
-  background: #2563eb;
+  background: #3F0997;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -58,6 +60,13 @@ export const FieldGroup = styled.div`
   gap: 4px;
 `;
 
+export const FieldGroupDtl = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+`;
+
 export const FieldLabel = styled.label`
   font-size: 0.78rem;
   font-weight: 600;
@@ -89,6 +98,7 @@ export const Input = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.9rem;
+  width: 50%;
 
   &:focus {
     outline: none;
@@ -101,6 +111,25 @@ export const Input = styled.input`
     cursor: not-allowed;
   }
 `;
+
+export const InputDate = styled.input`
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  &:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+  }
+`;
+
 
 export const ErrorText = styled.p`
   color: #dc2626;
@@ -184,7 +213,7 @@ export const ConfirmButton = styled.button`
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  background: #4f46e5;
+  background: #3F0997;
   color: #ffffff;
 
   &:hover:not(:disabled) {
@@ -211,4 +240,80 @@ export const HelperText = styled.p`
   font-size: 0.78rem;
   color: #9ca3af;
   margin: -4px 0 16px;
+`;
+
+export const VerifyRow = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+export const VerifyButton = styled.button`
+  padding: 10px 16px;
+  border: 1px solid #4f46e5;
+  border-radius: 8px;
+  background: #fff;
+  color: #4f46e5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: #eef2ff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+export const VerifiedBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #059669;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+`;
+
+export const OtpRow = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+`;
+
+export const OtpBox = styled.input`
+  width: 44px;
+  height: 44px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+`;
+
+export const OtpHelperText = styled.p`
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin: 6px 0 0;
+`;
+
+export const OtpErrorText = styled.p`
+  font-size: 0.78rem;
+  color: #dc2626;
+  margin: 6px 0 0;
 `;

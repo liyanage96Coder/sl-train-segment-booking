@@ -29,7 +29,7 @@ export const Badge = styled.span`
   padding: 2px 8px;
   border-radius: 999px;
   background: #eef2ff;
-  color: #4f46e5;
+  color: #3F0997;
   font-size: 0.8rem;
   font-weight: 600;
 `;
@@ -37,4 +37,9 @@ export const Badge = styled.span`
 export const FareText = styled.span`
   font-weight: 600;
   color: #111827;
+`;
+
+export const VerifiedTag = styled.span`
+  color: #059669;
+  font-weight: 700;
 `;

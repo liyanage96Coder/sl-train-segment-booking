@@ -82,6 +82,17 @@ export default function Dashboard() {
             ),
         },
         {
+            key: "phone",
+            header: "Phone",
+            width: "110px",
+            render: (b) => <S.RouteText>{b.phone || "—"}</S.RouteText>,
+        },
+        {
+            key: "email",
+            header: "Email",
+            render: (b) => <S.RouteText>{b.email || "—"}</S.RouteText>,
+        },
+        {
             key: "fare",
             header: "Fare",
             width: "90px",

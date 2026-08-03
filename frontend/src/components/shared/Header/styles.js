@@ -39,7 +39,7 @@ export const AddButton = styled.button`
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  background: #4f46e5;
+  background: #3F0997;
   color: #ffffff;
   white-space: nowrap;
   transition: background 0.15s ease;

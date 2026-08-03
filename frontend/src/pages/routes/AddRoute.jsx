@@ -174,10 +174,8 @@ export default function AddRoute() {
     return (
         <S.Wrapper>
             <Header
-                title="Stations"
-                subtitle="Manage the master list of stations on the network."
-                addNewPath="/stations/add"
-                addNewLabel="Add Station"
+                title="Add Routes"
+                subtitle="Add routes on the network."
             />
             <S.Heading>{isEditing ? "Edit Route" : "Add Route"}</S.Heading>
 

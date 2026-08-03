@@ -8,7 +8,7 @@ class Booking extends Model
 {
     protected $fillable = [
         'trip_id', 'from_station_id', 'to_station_id',
-        'passenger_name', 'local_count', 'foreign_count', 'total_fare',
+        'passenger_name','phone', 'email', 'email_verified', 'local_count', 'foreign_count', 'total_fare',
     ];
 
     public function trip()

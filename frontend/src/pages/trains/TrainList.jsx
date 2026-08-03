@@ -101,10 +101,10 @@ export default function TrainList() {
     return (
         <S.Wrapper>
             <Header
-                title="Stations"
-                subtitle="Manage the master list of stations on the network."
-                addNewPath="/stations/add"
-                addNewLabel="Add Station"
+                title="Trains"
+                subtitle="Manage the master list of trains on the network."
+                addNewPath="/admin/train/add_train"
+                addNewLabel="Add Train"
             />
             <S.Heading>Trains</S.Heading>
 

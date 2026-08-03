@@ -16,6 +16,13 @@ export const CoachWrapper = styled.div`
   overflow: auto;
 `;
 
+export const MsgWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+`;
 
 export const TopControls = styled.div`
   display: flex;
@@ -63,6 +70,11 @@ export const CalendarTitle = styled.span`
   color: #1f2937;
 `;
 
+export const NavWrapper = styled.div`
+  display: flex;
+  gap: 6px;
+`;
+
 export const NavButton = styled.button`
   border: none;
   background: #f3f4f6;
@@ -80,7 +92,7 @@ export const NavButton = styled.button`
 export const TodayButton = styled.button`
   border: none;
   background: none;
-  color: #4f46e5;
+  color: #3F0997;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
@@ -105,12 +117,12 @@ export const DayCell = styled.button`
   border-radius: 6px;
   font-size: 0.78rem;
   cursor: pointer;
-  background: ${({ $isSelected }) => ($isSelected ? "#4f46e5" : "transparent")};
+  background: ${({ $isSelected }) => ($isSelected ? "#3F0997" : "transparent")};
   color: ${({ $isSelected, $isOtherMonth }) =>
     $isSelected ? "#fff" : $isOtherMonth ? "#d1d5db" : "#374151"};
 
   &:hover {
-    background: ${({ $isSelected }) => ($isSelected ? "#4f46e5" : "#f3f4f6")};
+    background: ${({ $isSelected }) => ($isSelected ? "#3F0997" : "#f3f4f6")};
   }
 
   &::after {
@@ -123,7 +135,7 @@ export const DayCell = styled.button`
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: ${({ $isSelected }) => ($isSelected ? "#fff" : "#4f46e5")};
+    background: ${({ $isSelected }) => ($isSelected ? "#fff" : "#3F0997")};
   }
 `;
 
@@ -139,9 +151,9 @@ export const CoachTabs = styled.div`
 export const CoachTab = styled.button`
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1px solid ${({ $active }) => ($active ? "#4f46e5" : "#e5e7eb")};
+  border: 1px solid ${({ $active }) => ($active ? "#3F0997" : "#e5e7eb")};
   background: ${({ $active }) => ($active ? "#eef2ff" : "#fff")};
-  color: ${({ $active }) => ($active ? "#4f46e5" : "#6b7280")};
+  color: ${({ $active }) => ($active ? "#3F0997" : "#6b7280")};
   font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
@@ -206,7 +218,7 @@ export const BookingBlock = styled.div`
   right: 3px;
   top: ${({ $top }) => $top}px;
   height: ${({ $height }) => $height}px;
-  background: ${({ $type }) => ($type === "foreign" ? "#059669" : "#4f46e5")};
+  background: ${({ $type }) => ($type === "foreign" ? "#059669" : "#3F0997")};
   border-radius: 4px;
   cursor: pointer;
   display: flex;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Loader2, CheckCircle2, LogIn } from "lucide-react";
 import { getRoutes } from "../../api/routesApi";
 import { getTrainsForLeg, getSeatMap, createBooking } from "../../api/bookingApi";
@@ -34,6 +34,15 @@ export default function BookSeat() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+
+    //email verification
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [showOtpInputs, setShowOtpInputs] = useState(false);
+    const [otpValues, setOtpValues] = useState(["", "", "", ""]);
+    const [otpError, setOtpError] = useState("");
+    const otpRefs = useRef([]);
 
     //Login
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -152,6 +161,48 @@ export default function BookSeat() {
             .catch(() => { });
     };
 
+    const MOCK_VERIFICATION_CODE = "1234";
+
+    const handleSendVerification = () => {
+        if (!email.trim()) {
+            setOtpError("Enter an email address first.");
+            return;
+        }
+        setOtpError("");
+        setShowOtpInputs(true);
+        setOtpValues(["", "", "", ""]);
+        setTimeout(() => otpRefs.current[0]?.focus(), 0);
+    };
+
+    const handleOtpChange = (index, value) => {
+        if (!/^\d?$/.test(value)) return; // digits only, one char
+
+        const next = [...otpValues];
+        next[index] = value;
+        setOtpValues(next);
+        setOtpError("");
+
+        if (value && index < 3) {
+            otpRefs.current[index + 1]?.focus();
+        }
+
+        if (next.every((d) => d !== "")) {
+            const code = next.join("");
+            if (code === MOCK_VERIFICATION_CODE) {
+                setIsEmailVerified(true);
+                setShowOtpInputs(false);
+            } else {
+                setOtpError("Incorrect code. Please try again.");
+            }
+        }
+    };
+
+    const handleOtpKeyDown = (index, e) => {
+        if (e.key === "Backspace" && !otpValues[index] && index > 0) {
+            otpRefs.current[index - 1]?.focus();
+        }
+    };
+
     const handleConfirm = async () => {
         setError("");
         setSuccessMessage("");
@@ -167,6 +218,9 @@ export default function BookSeat() {
             from_station_id: fromStationId,
             to_station_id: toStationId,
             passenger_name: passengerName || undefined,
+            phone: phone || undefined,
+            email: email || undefined,
+            email_verified: isEmailVerified,
             seats: selectedSeatIds.map((seatId) => ({
                 seat_id: seatId,
                 passenger_type: seatTypeFor(seatId),
@@ -236,7 +290,7 @@ export default function BookSeat() {
 
                 <S.FieldGroup>
                     <S.FieldLabel>Travel date</S.FieldLabel>
-                    <S.Input
+                    <S.InputDate
                         type="date"
                         min={today}
                         value={travelDate}
@@ -343,7 +397,7 @@ export default function BookSeat() {
                 tagged local fare, the rest foreign fare.
             </S.HelperText>
 
-            <S.FieldGroup style={{ marginBottom: 20 }}>
+            <S.FieldGroupDtl style={{ marginBottom: 16 }}>
                 <S.FieldLabel>Passenger name (optional)</S.FieldLabel>
                 <S.Input
                     type="text"
@@ -351,7 +405,68 @@ export default function BookSeat() {
                     onChange={(e) => setPassengerName(e.target.value)}
                     placeholder="For the booking record"
                 />
-            </S.FieldGroup>
+            </S.FieldGroupDtl>
+
+            <S.FieldGroupDtl style={{ marginBottom: 16 }}>
+                <S.FieldLabel>Phone number</S.FieldLabel>
+                <S.Input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="07XXXXXXXX"
+                />
+            </S.FieldGroupDtl>
+
+            <S.FieldGroupDtl style={{ marginBottom: 20 }}>
+                <S.FieldLabel>Email</S.FieldLabel>
+                <S.VerifyRow>
+                    <S.Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            setIsEmailVerified(false);
+                            setShowOtpInputs(false);
+                        }}
+                        placeholder="you@example.com"
+                        disabled={isEmailVerified}
+                    />
+                    {isEmailVerified ? (
+                        <S.VerifiedBadge>
+                            <CheckCircle2 size={15} />
+                            Verified
+                        </S.VerifiedBadge>
+                    ) : (
+                        <S.VerifyButton type="button" onClick={handleSendVerification}>
+                            Verify
+                        </S.VerifyButton>
+                    )}
+                </S.VerifyRow>
+
+                {showOtpInputs && !isEmailVerified && (
+                    <>
+                        <S.OtpRow>
+                            {otpValues.map((digit, i) => (
+                                <S.OtpBox
+                                    key={i}
+                                    ref={(el) => (otpRefs.current[i] = el)}
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength={1}
+                                    value={digit}
+                                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                                />
+                            ))}
+                        </S.OtpRow>
+                        {otpError ? (
+                            <S.OtpErrorText>{otpError}</S.OtpErrorText>
+                        ) : (
+                            <S.OtpHelperText>Enter the 4-digit code sent to your email.(1234)</S.OtpHelperText>
+                        )}
+                    </>
+                )}
+            </S.FieldGroupDtl>
 
             {seatMapLoading && <p>Loading seat map...</p>}
 

@@ -31,7 +31,7 @@ export const NavLink = styled.span`
   font-size: 0.85rem;
   font-weight: 500;
   text-decoration: none;
-  color: ${({ $active }) => ($active ? "#4f46e5" : "#4b5563")};
+  color: ${({ $active }) => ($active ? "#3F0997" : "#4b5563")};
   background: ${({ $active }) => ($active ? "#eef2ff" : "transparent")};
   cursor: pointer;
 

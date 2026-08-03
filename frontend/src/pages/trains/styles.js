@@ -26,7 +26,7 @@ export const Badge = styled.span`
   padding: 2px 8px;
   border-radius: 999px;
   background: #eef2ff;
-  color: #4f46e5;
+  color: #3F0997;
   font-size: 0.8rem;
   font-weight: 600;
 `;
@@ -154,7 +154,7 @@ export const CoachCard = styled.div`
 export const CoachTitle = styled.p`
   font-size: 0.85rem;
   font-weight: 600;
-  color: #4f46e5;
+  color: #3F0997;
   margin: 0 0 10px;
 `;
 
@@ -208,7 +208,7 @@ export const AddCoachButton = styled.button`
   border: 1px dashed #6366f1;
   border-radius: 8px;
   background: #eef2ff;
-  color: #4f46e5;
+  color: #3F0997;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -274,7 +274,7 @@ export const SubmitButton = styled.button`
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  background: #4f46e5;
+  background: #3F0997;
   color: #ffffff;
   margin-top: 20px;
   transition: background 0.15s ease;

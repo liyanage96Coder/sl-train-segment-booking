@@ -57,7 +57,7 @@ export const SeatButton = styled.button`
         }
         if ($state === "selected-local") {
             return `
-        background: #4f46e5;
+        background: #3F0997;
         color: #ffffff;
       `;
         }

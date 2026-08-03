@@ -32,6 +32,9 @@ class BookingController extends Controller
             'from_station_id' => 'required|integer|exists:stations,id',
             'to_station_id' => 'required|integer|exists:stations,id|different:from_station_id',
             'passenger_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|unique:bookings,email',
+            'email_verified' => 'nullable|boolean',
             'seats' => 'required|array|min:1',
             'seats.*.seat_id' => 'required|integer|exists:seats,id|distinct',
             'seats.*.passenger_type' => 'required|in:local,foreign',
@@ -52,7 +55,7 @@ class BookingController extends Controller
         ], 201);
     }
 
-    
+
     public function destroy(Booking $booking)
     {
         $booking->delete();

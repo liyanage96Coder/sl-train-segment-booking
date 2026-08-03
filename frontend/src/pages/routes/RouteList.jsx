@@ -86,10 +86,10 @@ export default function RouteList() {
     return (
         <S.Wrapper>
             <Header
-                title="Stations"
-                subtitle="Manage the master list of stations on the network."
-                addNewPath="/stations/add"
-                addNewLabel="Add Station"
+                title="Routes"
+                subtitle="Manage the master list of routes on the network."
+                addNewPath="/admin/route/add_route"
+                addNewLabel="Add Route"
             />
             <S.Heading>Routes</S.Heading>
 
