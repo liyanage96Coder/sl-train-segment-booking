@@ -1,9 +1,41 @@
 import styled from "styled-components";
 
 export const Wrapper = styled.div`
-  max-width: 760px;
   margin: 0 auto;
   padding: 24px;
+`;
+
+export const LoginWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+export const LoginButton = styled.button`
+  padding: 10px 24px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+  }
 `;
 
 export const Heading = styled.h2`

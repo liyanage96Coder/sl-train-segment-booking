@@ -14,16 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::firstOrCreate(
-            ['email' => 'kerneluser@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => bcrypt('KernelUser@123'),
-            ]
-        );
 
         $this->call([
             StationSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

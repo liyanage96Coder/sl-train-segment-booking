@@ -265,4 +265,15 @@ class TrainController extends Controller
         ]);
     }
 
+    public function bookedDates(Train $train)
+    {
+        $dates = DB::table('trips')
+            ->join('bookings', 'bookings.trip_id', '=', 'trips.id')
+            ->where('trips.train_id', $train->id)
+            ->distinct()
+            ->pluck('trips.travel_date');
+
+        return response()->json($dates);
+    }
+
 }

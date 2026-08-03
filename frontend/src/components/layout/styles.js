@@ -39,3 +39,27 @@ export const NavLink = styled.span`
     background: ${({ $active }) => ($active ? "#eef2ff" : "#f3f4f6")};
   }
 `;
+
+export const Spacer = styled.div`
+  margin-top: auto;
+`;
+
+export const LogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: #fef2f2;
+  }
+`;

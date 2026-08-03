@@ -26,3 +26,5 @@ export const getTrainSchedule = (trainId, date) =>
     api.get(`/trains/${trainId}/schedule`, { params: { date } });
 
 export const deleteBooking = (id) => api.delete(`/bookings/${id}`);
+
+export const getBookedDates = (trainId) => api.get(`/trains/${trainId}/booked-dates`);

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "../Header/Header.jsx";
 import { getTrains } from "../../../api/trainApi.js";
-import { getTrainSchedule, deleteBooking } from "../../../api/bookingApi.js";
+import { getTrainSchedule, deleteBooking, getBookedDates } from "../../../api/bookingApi.js";
 import * as S from "./styles.js";
 
 const ROW_HEIGHT = 44;
@@ -29,6 +29,7 @@ export default function TrainSchedule() {
     const [coachId, setCoachId] = useState("");
     const [error, setError] = useState(null);
     const [selectedBooking, setSelectedBooking] = useState(null);
+    const [bookedDates, setBookedDates] = useState(new Set());
 
     useEffect(() => {
         getTrains()
@@ -51,6 +52,17 @@ export default function TrainSchedule() {
             })
             .catch(() => setError("Could not load the schedule."));
     }, [trainId, selectedDate]);
+
+    useEffect(() => {
+        if (!trainId) {
+            setBookedDates(new Set());
+            return;
+        }
+
+        getBookedDates(trainId)
+            .then((res) => setBookedDates(new Set(res.data)))
+            .catch(() => setError("Could not load booked dates."));
+    }, [trainId]);
 
     const days = useMemo(() => {
         const firstDow = new Date(viewYear, viewMonth, 1).getDay();
@@ -126,109 +138,108 @@ export default function TrainSchedule() {
             <Header title="Train Schedule" subtitle="Select a train and date to view seat bookings." />
 
             {error && <S.ErrorText>{error}</S.ErrorText>}
-
-            <S.TopControls>
-                <S.Select value={trainId} onChange={(e) => setTrainId(e.target.value)}>
-                    <option value="">Select a train</option>
-                    {trains.map((t) => (
-                        <option key={t.id} value={t.id}>
-                            {t.train_name}
-                        </option>
-                    ))}
-                </S.Select>
-
-                <S.CalendarPanel>
-                    <S.CalendarHeader>
-                        <S.TodayButton onClick={goToday}>Today</S.TodayButton>
-                        <S.CalendarTitle>
-                            {MONTHS[viewMonth]} {viewYear}
-                        </S.CalendarTitle>
-                        <div>
-                            <S.NavButton onClick={goPrevMonth}>‹</S.NavButton>
-                            <S.NavButton onClick={goNextMonth}>›</S.NavButton>
-                        </div>
-                    </S.CalendarHeader>
-
-                    <S.CalendarGrid>
-                        {DAY_LABELS.map((l, i) => (
-                            <S.DayLabel key={i}>{l}</S.DayLabel>
+            <S.ContentWrapper>
+                <S.TopControls>
+                    <S.Select value={trainId} onChange={(e) => setTrainId(e.target.value)}>
+                        <option value="">Select a Train</option>
+                        {trains.map((t) => (
+                            <option key={t.id} value={t.id}>
+                                {t.train_name}
+                            </option>
                         ))}
-                        {days.map((cell) => (
-                            <S.DayCell
-                                key={cell.key}
-                                $isOtherMonth={cell.isOtherMonth}
-                                $isSelected={cell.key === selectedDate}
-                                $hasBooking={false /* set true if you precompute booked dates for this train */}
-                                onClick={() => setSelectedDate(cell.key)}
-                            >
-                                {cell.day}
-                            </S.DayCell>
-                        ))}
-                    </S.CalendarGrid>
-                </S.CalendarPanel>
-            </S.TopControls>
+                    </S.Select>
 
-            {schedule && (
-                <>
-                    <S.CoachTabs>
-                        {schedule.coaches.map((c) => (
-                            <S.CoachTab
-                                key={c.id}
-                                $active={c.id === coachId}
-                                onClick={() => setCoachId(c.id)}
-                            >
-                                Coach {c.coach_number}
-                            </S.CoachTab>
-                        ))}
-                    </S.CoachTabs>
+                    <S.CalendarPanel>
+                        <S.CalendarHeader>
+                            <S.TodayButton onClick={goToday}>Today</S.TodayButton>
+                            <S.CalendarTitle>
+                                {MONTHS[viewMonth]} {viewYear}
+                            </S.CalendarTitle>
+                            <div>
+                                <S.NavButton onClick={goPrevMonth}>‹</S.NavButton>
+                                <S.NavButton onClick={goNextMonth}>›</S.NavButton>
+                            </div>
+                        </S.CalendarHeader>
 
-                    <S.GridArea>
-                        <S.HeaderRow>
-                            <S.HeaderCell $isStationCol>Station</S.HeaderCell>
-                            {activeCoach?.seats.map((seat) => (
-                                <S.HeaderCell key={seat.id}>Seat {seat.seat_number}</S.HeaderCell>
+                        <S.CalendarGrid>
+                            {DAY_LABELS.map((l, i) => (
+                                <S.DayLabel key={i}>{l}</S.DayLabel>
                             ))}
-                        </S.HeaderRow>
+                            {days.map((cell) => (
+                                <S.DayCell
+                                    key={cell.key}
+                                    $isOtherMonth={cell.isOtherMonth}
+                                    $isSelected={cell.key === selectedDate}
+                                    $hasBooking={bookedDates.has(cell.key)}
+                                    onClick={() => setSelectedDate(cell.key)}
+                                >
+                                    {cell.day}
+                                </S.DayCell>
+                            ))}
+                        </S.CalendarGrid>
+                    </S.CalendarPanel>
+                </S.TopControls>
 
-                        {routeStations.map((station, rowIndex) => (
-                            <S.BodyRow key={station.id}>
-                                <S.StationCell>{station.station_name}</S.StationCell>
+                {schedule ? (
+                    <S.CoachWrapper>
+                        <S.CoachTabs>
+                            {schedule.coaches.map((c) => (
+                                <S.CoachTab
+                                    key={c.id}
+                                    $active={c.id === coachId}
+                                    onClick={() => setCoachId(c.id)}
+                                >
+                                    Coach {c.coach_number}
+                                </S.CoachTab>
+                            ))}
+                        </S.CoachTabs>
 
-                                {activeCoach?.seats.map((seat) => {
-                                    if (rowIndex !== 0) return <S.SeatColumn key={seat.id} />;
+                        <S.GridArea>
+                            <S.HeaderRow>
+                                <S.HeaderCell $isStationCol>Station</S.HeaderCell>
+                                {activeCoach?.seats.map((seat) => (
+                                    <S.HeaderCell key={seat.id}>Seat {seat.seat_number}</S.HeaderCell>
+                                ))}
+                            </S.HeaderRow>
 
-                                    // Render each booking block once, from the FIRST row,
-                                    // spanning down by (to_stop_order - from_stop_order) rows.
-                                    const bookings = bookingsForSeat(seat.id);
+                            {routeStations.map((station, rowIndex) => (
+                                <S.BodyRow key={station.id}>
+                                    <S.StationCell>{station.station_name}</S.StationCell>
 
-                                    return (
-                                        <S.SeatColumn key={seat.id}>
-                                            {bookings.map((b) => {
-                                                const top = (b.from_stop_order - 1) * ROW_HEIGHT;
-                                                const height =
-                                                    (b.to_stop_order - b.from_stop_order) * ROW_HEIGHT - 2;
+                                    {activeCoach?.seats.map((seat) => {
+                                        if (rowIndex !== 0) return <S.SeatColumn key={seat.id} />;
+                                        const bookings = bookingsForSeat(seat.id);
+                                        return (
+                                            <S.SeatColumn key={seat.id}>
+                                                {bookings.map((b) => {
+                                                    const top = (b.from_stop_order - 1) * ROW_HEIGHT;
+                                                    const height =
+                                                        (b.to_stop_order - b.from_stop_order) * ROW_HEIGHT - 2;
 
-                                                return (
-                                                    <S.BookingBlock
-                                                        key={b.booking_seat_id}
-                                                        $top={top}
-                                                        $height={height}
-                                                        $type={b.passenger_type}
-                                                        title={`${b.passenger_name || "Passenger"} — ${b.from_station_name} → ${b.to_station_name}`}
-                                                        onClick={() => setSelectedBooking(b)}
-                                                    >
-                                                        {b.passenger_type === "foreign" ? "F" : "L"}
-                                                    </S.BookingBlock>
-                                                );
-                                            })}
-                                        </S.SeatColumn>
-                                    );
-                                })}
-                            </S.BodyRow>
-                        ))}
-                    </S.GridArea>
-                </>
-            )}
+                                                    return (
+                                                        <S.BookingBlock
+                                                            key={b.booking_seat_id}
+                                                            $top={top}
+                                                            $height={height}
+                                                            $type={b.passenger_type}
+                                                            title={`${b.passenger_name || "Passenger"} — ${b.from_station_name} → ${b.to_station_name}`}
+                                                            onClick={() => setSelectedBooking(b)}
+                                                        >
+                                                            {b.passenger_type === "foreign" ? "F" : "L"}
+                                                        </S.BookingBlock>
+                                                    );
+                                                })}
+                                            </S.SeatColumn>
+                                        );
+                                    })}
+                                </S.BodyRow>
+                            ))}
+                        </S.GridArea>
+                    </S.CoachWrapper>
+                ):(
+                "Please select a train and date to check availability."
+                )}
+            </S.ContentWrapper>
 
             {selectedBooking && (
                 <S.PopupOverlay onClick={(e) => e.target === e.currentTarget && setSelectedBooking(null)}>
@@ -240,7 +251,7 @@ export default function TrainSchedule() {
 
                         <S.InfoRow>
                             <span>Passenger</span>
-                            <span>{selectedBooking.passenger_name || "—"}</span>
+                            <span>{selectedBooking.passenger_name || "N/A"}</span>
                         </S.InfoRow>
                         <S.InfoRow>
                             <span>Type</span>
@@ -263,6 +274,7 @@ export default function TrainSchedule() {
                     </S.PopupContainer>
                 </S.PopupOverlay>
             )}
+
         </S.Wrapper>
     );
 }

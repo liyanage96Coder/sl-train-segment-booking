@@ -133,7 +133,6 @@ export const EmptyState = styled.p`
 //Station List
 
 export const WrapperList = styled.div`
-  max-width: 720px;
   margin: 0 auto;
   padding: 24px;
 `;

@@ -1,22 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, LogIn } from "lucide-react";
 import { getRoutes } from "../../api/routesApi";
 import { getTrainsForLeg, getSeatMap, createBooking } from "../../api/bookingApi";
 import SeatGrid from "../../components/shared/SeatGrid/SeatGrid.jsx";
+import LoginModal from "../../components/shared/LoginModal/LoginModal.jsx";
 import * as S from "./styles.js";
 
-/**
- * Booking flow:
- *  1. Pick a route -> populates an ordered from/to station list (stop_order).
- *  2. Pick from/to + travel date -> fetches trains that actually stop at both.
- *  3. Pick a train -> fetches the seat map (per-coach fares + per-seat availability).
- *  4. Set how many local / foreign passengers are travelling.
- *  5. Click seats in the grid. The Nth click is tagged "local" or "foreign"
- *     based on click order vs. the local/foreign counts above — this is the
- *     "global click order" logic SeatGrid defers back to this component.
- *  6. Confirm -> POSTs the booking. A 409 means someone else grabbed a seat
- *     first; we surface that and refresh the seat map so the grid reflects reality.
- */
 export default function BookSeat() {
     // Reference data
     const [routes, setRoutes] = useState([]);
@@ -45,6 +34,9 @@ export default function BookSeat() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+
+    //Login
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     const selectedRoute = useMemo(
         () => routes.find((r) => String(r.id) === String(routeId)),
@@ -209,6 +201,12 @@ export default function BookSeat() {
 
     return (
         <S.Wrapper>
+            <S.LoginWrapper>
+                <S.LoginButton onClick={() => setShowLoginModal(true)}>
+                    <LogIn size={16} />
+                    Login
+                </S.LoginButton>
+            </S.LoginWrapper>
             <S.Heading>Book a Seat</S.Heading>
 
             {error && <S.ErrorText>{error}</S.ErrorText>}
@@ -341,7 +339,7 @@ export default function BookSeat() {
                 </S.CountField>
             </S.PassengerRow>
             <S.HelperText>
-                Click seats in the order you'd like them assigned — the first {localCount || 0} clicks are
+                Note :-  Click seats in the order you'd like them assigned — the first {localCount || 0} clicks are
                 tagged local fare, the rest foreign fare.
             </S.HelperText>
 
@@ -367,7 +365,6 @@ export default function BookSeat() {
                         onSeatClick={handleSeatClick}
                     />
                 ))}
-
             {seatMap && (
                 <S.SummaryBar>
                     <S.SummaryText>
@@ -384,6 +381,7 @@ export default function BookSeat() {
                     </S.ConfirmButton>
                 </S.SummaryBar>
             )}
+            {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
         </S.Wrapper>
     );
 }

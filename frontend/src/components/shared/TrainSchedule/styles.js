@@ -4,8 +4,22 @@ export const Wrapper = styled.div`
   padding: 24px;
 `;
 
+export const ContentWrapper = styled.div`
+ display: flex;
+ flex-direction: row;
+ gap: 20px;
+`;
+
+export const CoachWrapper = styled.div`
+ display: flex;
+ flex-direction: column;
+  overflow: auto;
+`;
+
+
 export const TopControls = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 16px;
   align-items: flex-start;
   margin-bottom: 20px;
@@ -93,7 +107,7 @@ export const DayCell = styled.button`
   cursor: pointer;
   background: ${({ $isSelected }) => ($isSelected ? "#4f46e5" : "transparent")};
   color: ${({ $isSelected, $isOtherMonth }) =>
-        $isSelected ? "#fff" : $isOtherMonth ? "#d1d5db" : "#374151"};
+    $isSelected ? "#fff" : $isOtherMonth ? "#d1d5db" : "#374151"};
 
   &:hover {
     background: ${({ $isSelected }) => ($isSelected ? "#4f46e5" : "#f3f4f6")};

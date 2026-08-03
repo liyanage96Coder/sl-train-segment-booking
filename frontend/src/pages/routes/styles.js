@@ -1,7 +1,6 @@
 import styled from "styled-components";
 
 export const Wrapper = styled.div`
-  max-width: 560px;
   margin: 0 auto;
   padding: 24px;
 `;
@@ -151,7 +150,6 @@ export const DistanceLabel = styled.span`
 //Routes List
 
 export const WrapperList = styled.div`
-  max-width: 720px;
   margin: 0 auto;
   padding: 24px;
 `;

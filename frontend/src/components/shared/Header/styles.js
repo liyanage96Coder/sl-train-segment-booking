@@ -13,6 +13,7 @@ export const TitleGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+  align-items: flex-start;
 `;
 
 export const Title = styled.h2`

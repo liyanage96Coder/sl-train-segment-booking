@@ -1,18 +1,13 @@
 import * as S from "./styles.js";
 
-/**
- * Renders one coach's seats. Selection state and click handling live in
- * the parent (BookSeat) so the local/foreign tagging logic — which
- * depends on the GLOBAL order seats were clicked across every coach —
- * stays in one place.
- */
+
 export default function SeatGrid({ coach, selectedSeatIds, seatTypeFor, onSeatClick }) {
     return (
         <S.CoachBlock>
             <S.CoachHeader>
                 <S.CoachTitle>Coach {coach.coach_number}</S.CoachTitle>
                 <S.CoachFares>
-                    Local: LKR {Number(coach.fare_local).toFixed(2)} · Foreign: USD{" "}
+                    Local: LKR {Number(coach.fare_local).toFixed(2)} · Foreign: LKR
                     {Number(coach.fare_foreign).toFixed(2)}
                 </S.CoachFares>
             </S.CoachHeader>
