@@ -5,9 +5,47 @@ export const Wrapper = styled.div`
   padding: 24px;
 `;
 
+export const Hero = styled.div`
+  height: 350px;
+  background-image: linear-gradient(
+      rgba(0, 0, 0, 0.35),
+      rgba(0, 0, 0, 0.45)
+    ),
+    url("/header_image.png");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-radius: 0 0 24px 24px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const HeroContent = styled.div`
+  width: 1200px;
+  padding: 30px;
+`;
+
 export const LoginWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-bottom: 60px;
+`;
+
+export const Heading = styled.h1`
+  color: white;
+  font-size: 56px;
+  font-weight: 700;
+  margin: 0;
+`;
+
+export const SubHeading = styled.p`
+  color: rgba(255,255,255,.9);
+  font-size: 20px;
+  margin-top: 32px;
 `;
 
 export const LoginButton = styled.button`
@@ -40,12 +78,6 @@ export const LoginButton = styled.button`
   }
 `;
 
-export const Heading = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 20px;
-`;
 
 export const SelectorGrid = styled.div`
   display: grid;
@@ -131,20 +163,38 @@ export const InputDate = styled.input`
 `;
 
 
-export const ErrorText = styled.p`
-  color: #dc2626;
-  font-size: 0.85rem;
-  margin: 8px 0;
+export const ErrorText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 98%;
+  padding: 14px 6px;
+  margin: 16px 0;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08);
 `;
 
 export const SuccessBanner = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 98%;
+  padding: 14px 6px;
+  margin: 16px 0;
+  border-radius: 12px;
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
   color: #065f46;
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
 `;
 
 export const Divider = styled.hr`
