@@ -7,7 +7,7 @@ import { addRoute, getRoute, updateRoute } from "../../api/routesApi";
 import * as S from "./styles.js";
 
 export default function AddRoute() {
-    const { routeId } = useParams(); // undefined when adding, a string when editing
+    const { routeId } = useParams();
     const isEditing = Boolean(routeId);
     const navigate = useNavigate();
 
@@ -22,7 +22,6 @@ export default function AddRoute() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    // Load the existing route (only in edit mode) and seed selected/distances from it.
     useEffect(() => {
         if (!isEditing) return;
 
@@ -163,7 +162,7 @@ export default function AddRoute() {
             } else {
                 await addRoute(payload);
             }
-            navigate("/routes");
+            navigate("/admin/routes");
         } catch (err) {
             setError(
                 err.response?.data?.message ||

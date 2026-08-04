@@ -100,3 +100,31 @@ export const SubmitButton = styled.button`
     to { transform: rotate(360deg); }
   }
 `;
+
+export const PasswordField = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+export const EyeToggle = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #94a3b8;
+
+  &:hover {
+    color: #475569;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;

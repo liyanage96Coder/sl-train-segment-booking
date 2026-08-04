@@ -9,10 +9,12 @@ class StationSeeder extends Seeder
 {
     public function run(): void
     {
-        Station::create([
+       Station::firstOrCreate(
+        ['station_code' => 'CFO'],
+        [
             'station_name' => 'Colombo Fort',
-            'station_code' => 'CFO',
-            'station_order' => 1
-        ]);
+            'station_order' => 1,
+        ]
+    );
     }
 }

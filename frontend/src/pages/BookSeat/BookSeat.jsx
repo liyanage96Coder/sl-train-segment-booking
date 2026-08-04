@@ -113,7 +113,7 @@ export default function BookSeat() {
     useEffect(() => {
         getRoutes()
             .then((res) => setRoutes(res.data))
-            .catch(() => setError("Couldn't load routes. Refresh and try again."))
+            .catch(() => setError("Couldn't load routes. Please wait until admin fixes the backend."))
             .finally(() => setRoutesLoading(false));
     }, []);
 

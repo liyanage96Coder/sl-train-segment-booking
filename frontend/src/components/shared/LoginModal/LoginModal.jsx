@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, TrainFront } from "lucide-react";
+import { Loader2, TrainFront, Eye, EyeOff } from "lucide-react";
 import { login } from "../../../api/authApi";
 import * as S from "./styles";
 
@@ -8,6 +8,7 @@ export default function LoginModal({ onClose }) {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,13 +56,25 @@ export default function LoginModal({ onClose }) {
                         disabled={isSubmitting}
                         autoFocus
                     />
-                    <S.Input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={isSubmitting}
-                    />
+
+                    <S.PasswordField>
+                        <S.Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={isSubmitting}
+                        />
+                        <S.EyeToggle
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            disabled={isSubmitting}
+                            tabIndex={-1}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </S.EyeToggle>
+                    </S.PasswordField>
 
                     {error && <S.ErrorText>{error}</S.ErrorText>}
 

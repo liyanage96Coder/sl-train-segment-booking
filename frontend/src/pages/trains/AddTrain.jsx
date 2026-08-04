@@ -191,7 +191,7 @@ export default function AddTrain() {
                 });
             }
 
-            navigate("/trains");
+            navigate("/admin/trains");
         } catch (err) {
             setError(
                 err.response?.data?.message ||
