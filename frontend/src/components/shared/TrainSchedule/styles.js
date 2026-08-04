@@ -216,6 +216,7 @@ export const BookingBlock = styled.div`
   position: absolute;
   left: 3px;
   right: 3px;
+  z-index: 5;
   top: ${({ $top }) => $top}px;
   height: ${({ $height }) => $height}px;
   background: ${({ $type }) => ($type === "foreign" ? "#059669" : "#3F0997")};
@@ -304,5 +305,38 @@ export const DeleteButton = styled.button`
 
   &:hover {
     background: #fee2e2;
+  }
+
+  &:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+`;
+
+export const BookingTooltip = styled.div`
+  position: fixed;
+  top: ${({ $y }) => $y + 14}px;
+  left: ${({ $x }) => $x + 14}px;
+  background: #1f2937;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  z-index: 200;
+  pointer-events: none;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+`;
+
+export const TooltipRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 0;
+
+  strong {
+    color: #9ca3af;
+    font-weight: 500;
   }
 `;

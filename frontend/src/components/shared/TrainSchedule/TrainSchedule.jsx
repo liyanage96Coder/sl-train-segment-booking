@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Calendar } from "lucide-react";
 import Header from "../Header/Header.jsx";
 import { getTrains } from "../../../api/trainApi.js";
 import { getTrainSchedule, deleteBooking, getBookedDates } from "../../../api/bookingApi.js";
 import * as S from "./styles.js";
 
-const ROW_HEIGHT = 44;
+const ROW_HEIGHT = 54;
 const MONTHS = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
@@ -31,6 +32,8 @@ export default function TrainSchedule() {
     const [error, setError] = useState(null);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [bookedDates, setBookedDates] = useState(new Set());
+    const [hoveredBooking, setHoveredBooking] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
         getTrains()
@@ -134,6 +137,10 @@ export default function TrainSchedule() {
         }
     };
 
+    const handleMouseMove = (e) => {
+        setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
     return (
         <S.Wrapper>
             <Header title="Train Schedule" subtitle="Select a train and date to view seat bookings." />
@@ -194,7 +201,6 @@ export default function TrainSchedule() {
                                 </S.CoachTab>
                             ))}
                         </S.CoachTabs>
-
                         <S.GridArea>
                             <S.HeaderRow>
                                 <S.HeaderCell $isStationCol>Station</S.HeaderCell>
@@ -215,7 +221,8 @@ export default function TrainSchedule() {
                                                 {bookings.map((b) => {
                                                     const top = (b.from_stop_order - 1) * ROW_HEIGHT;
                                                     const height =
-                                                        (b.to_stop_order - b.from_stop_order) * ROW_HEIGHT - 2;
+                                                        (b.to_stop_order - b.from_stop_order) * ROW_HEIGHT - 1;
+                                                    const bookingKey = `${seat.id}-${b.booking_seat_id}`;
 
                                                     return (
                                                         <S.BookingBlock
@@ -223,10 +230,27 @@ export default function TrainSchedule() {
                                                             $top={top}
                                                             $height={height}
                                                             $type={b.passenger_type}
-                                                            title={`${b.passenger_name || "Passenger"} — ${b.from_station_name} → ${b.to_station_name}`}
+                                                            onMouseEnter={() => setHoveredBooking(bookingKey)}
+                                                            onMouseLeave={() => setHoveredBooking(null)}
+                                                            onMouseMove={handleMouseMove}
                                                             onClick={() => setSelectedBooking(b)}
                                                         >
                                                             {b.passenger_type === "foreign" ? "F" : "L"}
+                                                            {hoveredBooking === bookingKey &&
+                                                                createPortal(
+                                                                    <S.BookingTooltip $x={mousePosition.x} $y={mousePosition.y}>
+                                                                        <S.TooltipRow>
+                                                                            <strong>Passenger:</strong> {b.passenger_name || "N/A"}
+                                                                        </S.TooltipRow>
+                                                                        <S.TooltipRow>
+                                                                            <strong>Phone:</strong> {b.phone || "N/A"}
+                                                                        </S.TooltipRow>
+                                                                        <S.TooltipRow>
+                                                                            <strong>Route:</strong> {b.from_station_name} → {b.to_station_name}
+                                                                        </S.TooltipRow>
+                                                                    </S.BookingTooltip>,
+                                                                    document.body
+                                                                )}
                                                         </S.BookingBlock>
                                                     );
                                                 })}
@@ -274,7 +298,7 @@ export default function TrainSchedule() {
                             <span>{selectedBooking.fare}</span>
                         </S.InfoRow>
 
-                        <S.DeleteButton onClick={handleDelete}>Delete Booking</S.DeleteButton>
+                        <S.DeleteButton disabled={true} onClick={handleDelete}>Delete Booking</S.DeleteButton>
                     </S.PopupContainer>
                 </S.PopupOverlay>
             )}

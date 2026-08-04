@@ -225,6 +225,7 @@ class TrainController extends Controller
                     'booking_seats.fare',
                     'bookings.id as booking_id',
                     'bookings.passenger_name',
+                    'bookings.phone',
                     'bookings.from_station_id',
                     'bookings.to_station_id'
                 )
@@ -239,6 +240,7 @@ class TrainController extends Controller
                         'seat_id' => $row->seat_id,
                         'passenger_type' => $row->passenger_type,
                         'passenger_name' => $row->passenger_name,
+                        'phone' => $row->phone,
                         'fare' => $row->fare,
                         'from_stop_order' => $stopOrderByStation[$row->from_station_id] ?? null,
                         'to_stop_order' => $stopOrderByStation[$row->to_station_id] ?? null,
