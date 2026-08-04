@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrainFront } from "lucide-react";
 import { login } from "../../../api/authApi";
 import * as S from "./styles";
 
@@ -38,7 +38,11 @@ export default function LoginModal({ onClose }) {
         <S.Overlay onClick={(e) => e.target === e.currentTarget && onClose()}>
             <S.Modal>
                 <S.Header>
-                    <S.Title>Staff Login</S.Title>
+                    <div></div>
+                    <S.Title>
+                        <TrainFront size={20} />
+                        LankaRail
+                    </S.Title>
                     <S.CloseButton onClick={onClose}>✕</S.CloseButton>
                 </S.Header>
 

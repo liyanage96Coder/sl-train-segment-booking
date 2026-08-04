@@ -24,7 +24,10 @@ export const Header = styled.div`
   margin-bottom: 16px;
 `;
 
-export const Title = styled.h3`
+export const Title = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 1.05rem;
   font-weight: 600;
   color: #1f2937;

@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('station_id')->constrained()->restrictOnDelete();
             $table->unsignedInteger('stop_order');
             $table->decimal('distance_km', 8, 2);
+            $table->unsignedInteger('estimated_arrival_minutes');
             $table->softDeletes();
             $table->timestamps();
 

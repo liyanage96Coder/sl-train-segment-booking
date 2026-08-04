@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Loader2, CheckCircle2, LogIn, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, LogIn, AlertCircle, Clock } from "lucide-react";
 import { getRoutes } from "../../api/routesApi";
 import { getTrainsForLeg, getSeatMap, createBooking } from "../../api/bookingApi";
 import SeatGrid from "../../components/shared/SeatGrid/SeatGrid.jsx";
 import LoginModal from "../../components/shared/LoginModal/LoginModal.jsx";
+import Footer from "../../components/shared/Footer/Footer.jsx";
 import * as S from "./styles.js";
 
 export default function BookSeat() {
@@ -33,6 +34,7 @@ export default function BookSeat() {
     // Submission state
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState("");
 
     //email verification
@@ -90,6 +92,22 @@ export default function BookSeat() {
             return sum + Number(type === "foreign" ? fares.fare_foreign : fares.fare_local);
         }, 0);
     }, [selectedSeatIds, fareByCoachForSeat, seatTypeFor]);
+
+    const selectedTrain = trains.find((t) => String(t.id) === String(trainId));
+
+    const clockTimeFor = (station) => {
+        if (!selectedTrain?.departure_time || !station) return null;
+
+        const [depH, depM] = selectedTrain.departure_time.split(":").map(Number);
+        const totalMinutes = depH * 60 + depM + station.pivot.estimated_arrival_minutes;
+
+        const h = Math.floor(totalMinutes / 60) % 24;
+        const m = totalMinutes % 60;
+        const period = h < 12 ? "AM" : "PM";
+        const displayHour = h % 12 === 0 ? 12 : h % 12;
+
+        return `${displayHour}:${String(m).padStart(2, "0")} ${period}`;
+    };
 
     // --- Load routes once ---
     useEffect(() => {
@@ -235,6 +253,7 @@ export default function BookSeat() {
             );
             setSelectedSeatIds([]);
             refreshSeatMap();
+            resetForm();
         } catch (err) {
             if (err.response?.status === 409) {
                 setError(
@@ -243,12 +262,41 @@ export default function BookSeat() {
                 );
                 setSelectedSeatIds([]);
                 refreshSeatMap();
+            } else if (err.response?.status === 422) {
+                const errors = err.response.data.errors || {};
+                const flatErrors = {};
+                Object.entries(errors).forEach(([field, messages]) => {
+                    flatErrors[field] = Array.isArray(messages) ? messages[0] : messages;
+                });
+                setFieldErrors(flatErrors);
+                setError("Please fix the highlighted fields below.");
             } else {
                 setError("Something went wrong confirming the booking. Please try again.");
             }
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const resetForm = () => {
+        setRouteId("");
+        setFromStationId("");
+        setToStationId("");
+        setTravelDate("");
+        setTrainId("");
+        setTrains([]);
+        setSeatMap(null);
+        setLocalCount(1);
+        setForeignCount(0);
+        setSelectedSeatIds([]);
+        setPassengerName("");
+        setPhone("");
+        setEmail("");
+        setIsEmailVerified(false);
+        setShowOtpInputs(false);
+        setOtpValues(["", "", "", ""]);
+        setOtpError("");
+        setFieldErrors({});
     };
 
     const today = new Date().toISOString().split("T")[0];
@@ -275,7 +323,7 @@ export default function BookSeat() {
                         <AlertCircle size={20} />
                         <span>{error}</span>
                     </S.ErrorText>
-                    }
+                }
                 {successMessage && (
                     <S.SuccessBanner>
                         <CheckCircle2 size={16} style={{ verticalAlign: "middle", marginRight: 6 }} />
@@ -351,7 +399,13 @@ export default function BookSeat() {
                         </S.Select>
                     </S.FieldGroup>
                 </S.SelectorGrid>
-
+                {selectedTrain && fromStationId && toStationId && (
+                    <S.DurationBadge>
+                        <Clock size={14} />
+                        Depart {clockTimeFor(orderedStations.find(s => String(s.id) === String(fromStationId)))} →
+                        Arrive {clockTimeFor(orderedStations.find(s => String(s.id) === String(toStationId)))}
+                    </S.DurationBadge>
+                )}
                 <S.FieldGroup style={{ marginBottom: 16 }}>
                     <S.FieldLabel>Train</S.FieldLabel>
                     <S.Select
@@ -409,8 +463,20 @@ export default function BookSeat() {
                     tagged local fare, the rest foreign fare.
                 </S.HelperText>
 
+                {seatMapLoading && <p>Loading seat map...</p>}
+
+                {seatMap &&
+                    seatMap.coaches.map((coach) => (
+                        <SeatGrid
+                            key={coach.id}
+                            coach={coach}
+                            selectedSeatIds={selectedSeatIds}
+                            seatTypeFor={seatTypeFor}
+                            onSeatClick={handleSeatClick}
+                        />
+                    ))}
                 <S.FieldGroupDtl style={{ marginBottom: 16 }}>
-                    <S.FieldLabel>Passenger name (optional)</S.FieldLabel>
+                    <S.FieldLabel>Passenger name </S.FieldLabel>
                     <S.Input
                         type="text"
                         value={passengerName}
@@ -441,7 +507,7 @@ export default function BookSeat() {
                                 setShowOtpInputs(false);
                             }}
                             placeholder="you@example.com"
-                            disabled={isEmailVerified}
+
                         />
                         {isEmailVerified ? (
                             <S.VerifiedBadge>
@@ -454,7 +520,7 @@ export default function BookSeat() {
                             </S.VerifyButton>
                         )}
                     </S.VerifyRow>
-
+                    {fieldErrors.email && <S.FieldErrorText>{fieldErrors.email}</S.FieldErrorText>}
                     {showOtpInputs && !isEmailVerified && (
                         <>
                             <S.OtpRow>
@@ -479,19 +545,6 @@ export default function BookSeat() {
                         </>
                     )}
                 </S.FieldGroupDtl>
-
-                {seatMapLoading && <p>Loading seat map...</p>}
-
-                {seatMap &&
-                    seatMap.coaches.map((coach) => (
-                        <SeatGrid
-                            key={coach.id}
-                            coach={coach}
-                            selectedSeatIds={selectedSeatIds}
-                            seatTypeFor={seatTypeFor}
-                            onSeatClick={handleSeatClick}
-                        />
-                    ))}
                 {seatMap && (
                     <S.SummaryBar>
                         <S.SummaryText>
@@ -510,6 +563,7 @@ export default function BookSeat() {
                 )}
                 {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
             </S.Wrapper>
+            <Footer />
         </>
     );
 }

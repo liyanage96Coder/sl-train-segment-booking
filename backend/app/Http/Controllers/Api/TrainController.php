@@ -41,6 +41,7 @@ class TrainController extends Controller
         $validated = $request->validate([
             'train_name' => 'required|string|max:255',
             'route_id' => 'required|integer|exists:routes,id',
+            'departure_time' => 'required|date_format:H:i',
             'coaches' => 'required|array|min:1',
             'coaches.*.seat_count' => 'required|integer|min:1|max:200',
             'coaches.*.price_local_per_km' => 'required|numeric|min:0',
@@ -61,6 +62,7 @@ class TrainController extends Controller
             $train = Train::create([
                 'train_name' => $validated['train_name'],
                 'route_id' => $validated['route_id'],
+                'departure_time' => $validated['departure_time'],
             ]);
 
             foreach ($validated['coaches'] as $index => $coach) {

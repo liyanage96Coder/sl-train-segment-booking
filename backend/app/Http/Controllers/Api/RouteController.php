@@ -77,6 +77,7 @@ class RouteController extends Controller
             'stations.*.station_id' => 'required|integer|exists:stations,id|distinct',
             'stations.*.stop_order' => 'required|integer|min:1|distinct',
             'stations.*.distance_km' => 'required|numeric|min:0',
+            'stations.*.estimated_arrival_minutes' => 'required|integer|min:0',
         ]);
 
         $sorted = collect($validated['stations'])->sortBy('stop_order')->values();
@@ -95,6 +96,13 @@ class RouteController extends Controller
             }
         }
 
+        $arrivalMinutes = $sorted->pluck('estimated_arrival_minutes')->values();
+        for ($i = 1; $i < $arrivalMinutes->count(); $i++) {
+            if ($arrivalMinutes[$i] <= $arrivalMinutes[$i - 1]) {
+                abort(422, 'Estimated arrival time must increase with each stop, in order.');
+            }
+        }
+
         return $validated;
     }
 
@@ -104,6 +112,7 @@ class RouteController extends Controller
             $s['station_id'] => [
                 'stop_order' => $s['stop_order'],
                 'distance_km' => $s['distance_km'],
+                'estimated_arrival_minutes' => $s['estimated_arrival_minutes'],
             ],
         ])->all();
 

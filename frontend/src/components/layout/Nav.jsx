@@ -32,7 +32,7 @@ export default function Nav() {
 
     return (
         <S.NavBar>
-            <S.Brand>Train Booking</S.Brand>
+            <S.Brand>LankaRail</S.Brand>
             {links.map(({ to, label, icon: Icon }) => (
                 <RouterNavLink key={to} to={to} style={{ textDecoration: "none" }}>
                     {({ isActive }) => (

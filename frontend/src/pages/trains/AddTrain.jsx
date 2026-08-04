@@ -18,6 +18,7 @@ export default function AddTrain() {
 
     const [trainName, setTrainName] = useState("");
     const [routes, setRoutes] = useState([]);
+    const [departureTime, setDepartureTime] = useState("");
     const [isLoadingRoutes, setIsLoadingRoutes] = useState(true);
     const [isLoadingTrain, setIsLoadingTrain] = useState(isEditing);
     const [selectedRouteId, setSelectedRouteId] = useState("");
@@ -130,6 +131,11 @@ export default function AddTrain() {
             return;
         }
 
+        if (!departureTime) {
+            setError("Please set a departure time.");
+            return;
+        }
+
         if (!selectedRouteId) {
             setError("Please select a route.");
             return;
@@ -175,6 +181,7 @@ export default function AddTrain() {
                 await addTrain({
                     train_name: trainName.trim(),
                     route_id: Number(selectedRouteId),
+                    departure_time: departureTime,
                     stop_station_ids: selectedStopIds,
                     coaches: coaches.map((c) => ({
                         seat_count: Number(c.seat_count),
@@ -220,6 +227,13 @@ export default function AddTrain() {
                     placeholder="Train name (e.g. Udarata Menike)"
                     value={trainName}
                     onChange={(e) => setTrainName(e.target.value)}
+                    disabled={isSubmitting}
+                />
+                <S.SectionLabel>Departure Time</S.SectionLabel>
+                <S.Input
+                    type="time"
+                    value={departureTime}
+                    onChange={(e) => setDepartureTime(e.target.value)}
                     disabled={isSubmitting}
                 />
 

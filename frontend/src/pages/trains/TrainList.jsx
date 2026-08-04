@@ -55,6 +55,12 @@ export default function TrainList() {
     const columns = [
         { key: "train_name", header: "Train Name" },
         {
+            key: "departure_time",
+            header: "Departs",
+            width: "90px",
+            render: (train) => train.departure_time?.slice(0, 5), // "09:00:00" -> "09:00"
+        },
+        {
             key: "route",
             header: "Route",
             render: (train) => <S.RouteText>{train.route.route_name}</S.RouteText>,

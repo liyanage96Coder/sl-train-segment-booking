@@ -18,6 +18,7 @@ export default function AddRoute() {
     // Map of stationId -> stop_order, only present for checked stations.
     const [selected, setSelected] = useState({});
     const [distances, setDistances] = useState({});
+    const [arrivalTimes, setArrivalTimes] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -32,12 +33,14 @@ export default function AddRoute() {
 
                 const nextSelected = {};
                 const nextDistances = {};
+                const nextArrivalTimes = {};
                 route.stations.forEach((s) => {
                     nextSelected[s.id] = s.pivot.stop_order;
                     nextDistances[s.id] = s.pivot.distance_km;
                 });
                 setSelected(nextSelected);
                 setDistances(nextDistances);
+                setArrivalTimes(nextArrivalTimes);
             })
             .catch(() => setError("Couldn't load this route."))
             .finally(() => setIsLoadingRoute(false));
@@ -69,6 +72,10 @@ export default function AddRoute() {
         return selectedCount + 1;
     };
 
+    const handleArrivalTimeChange = (stationId, value) => {
+        setArrivalTimes((prev) => ({ ...prev, [stationId]: value }));
+    };
+
     const handleToggle = (station) => {
         setSelected((prev) => {
             const next = { ...prev };
@@ -77,6 +84,10 @@ export default function AddRoute() {
                 delete next[station.id];
                 setDistances((prevDist) => {
                     const { [station.id]: _, ...rest } = prevDist;
+                    return rest;
+                });
+                setArrivalTimes((prevArr) => {
+                    const { [station.id]: _, ...rest } = prevArr;
                     return rest;
                 });
                 const remaining = Object.entries(next).sort((a, b) => a[1] - b[1]);
@@ -142,6 +153,7 @@ export default function AddRoute() {
                 station_id: Number(station_id),
                 stop_order,
                 distance_km: Number(distances[station_id] || 0),
+                estimated_arrival_minutes: Number(arrivalTimes[station_id] || 0),
             })),
         };
 
@@ -239,6 +251,16 @@ export default function AddRoute() {
                                             disabled={isSubmitting}
                                         />
                                         <S.DistanceLabel>km from origin</S.DistanceLabel>
+                                        <S.DistanceInput
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            placeholder="min"
+                                            value={arrivalTimes[station.id] || ""}
+                                            onChange={(e) => handleArrivalTimeChange(station.id, e.target.value)}
+                                            disabled={isSubmitting}
+                                        />
+                                        <S.DistanceLabel>min from origin</S.DistanceLabel>
                                     </>
                                 )}
                             </S.StationRow>

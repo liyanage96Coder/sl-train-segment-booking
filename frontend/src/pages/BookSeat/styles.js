@@ -166,6 +166,7 @@ export const InputDate = styled.input`
 export const ErrorText = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   width: 98%;
   padding: 14px 6px;
@@ -183,6 +184,7 @@ export const ErrorText = styled.div`
 export const SuccessBanner = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   width: 98%;
   padding: 14px 6px;
@@ -365,5 +367,24 @@ export const OtpHelperText = styled.p`
 export const OtpErrorText = styled.p`
   font-size: 0.78rem;
   color: #dc2626;
+  margin: 6px 0 0;
+`;
+
+export const DurationBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #f5f3ff;
+  color: #6d28d9;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+`;
+
+export const FieldErrorText = styled.p`
+  color: #dc2626;
+  font-size: 0.78rem;
   margin: 6px 0 0;
 `;

@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Train extends Model
 {
     use SoftDeletes;
-    
-    protected $fillable = ['train_name', 'route_id'];
+
+    protected $fillable = ['train_name', 'route_id', 'departure_time'];
 
     public function route()
     {

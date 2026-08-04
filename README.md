@@ -256,6 +256,11 @@ station segments, not just one leg at a time.
 train/date, where each booking renders as a block spanning the stations it covers --
 clicking a block shows passenger/fare details with a delete action.
 
+### Their is no proper way to handle admin actions
+**Problem:** Any one can list stations and performe other action in admin dashboard
+**Solution:** Apply JWT token for admin operations.
+
+
 ## Challenges & Tradeoffs
 
 - **Windows/WSL2 Docker build failures** (`exec format error` on `npm install`) were
@@ -279,7 +284,6 @@ clicking a block shows passenger/fare details with a delete action.
 
 - Real-time seat map updates via polling or Laravel Reverb/WebSocket broadcasting, so a
   seat goes red for other viewers the moment it's booked, not just on next fetch.
-- Apply JWT token for admin operations.
 - Edit forms for routes/trains (currently create + delete only; editing an existing
   route's stations mid-flight also needs a policy decision about what happens to
   bookings already made against the old station order).
